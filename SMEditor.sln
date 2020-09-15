@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.1231
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SMEditor", "SMEditor\SMEditor.csproj", "{AAA6C716-96CC-4C2C-AB48-5D56517B5CD1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AAA6C716-96CC-4C2C-AB48-5D56517B5CD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AAA6C716-96CC-4C2C-AB48-5D56517B5CD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AAA6C716-96CC-4C2C-AB48-5D56517B5CD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AAA6C716-96CC-4C2C-AB48-5D56517B5CD1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E1407CD0-A4DD-4A4F-B309-FBC2BEBFBD5E}
+	EndGlobalSection
+EndGlobal
