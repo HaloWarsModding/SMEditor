@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using SlimDX.DirectInput;
 using Buffer = SlimDX.Direct3D11.Buffer;
 using Device = SlimDX.Direct3D11.Device;
 
@@ -15,7 +16,7 @@ namespace SMEditor
     {
         public Transform t = new Transform();
         static CBData cbData = new CBData();
-        public static float MoveSpeed = .1f;
+        public static float MoveSpeed = .2f;
 
         static Buffer cb;
         static bool init = false;
@@ -118,18 +119,16 @@ namespace SMEditor
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         public override void Update()
         {
-            if (Input.KeyIsDown(SlimDX.DirectInput.Key.W)) Rotate(0, 0.01f);
-            if (Input.KeyIsDown(SlimDX.DirectInput.Key.S)) Rotate(0, -.01f);
-            if (Input.KeyIsDown(SlimDX.DirectInput.Key.A)) Rotate(0.01f, 0);
-            if (Input.KeyIsDown(SlimDX.DirectInput.Key.D)) Rotate(-.01f, 0);
 
-            if (Input.KeyIsDown(SlimDX.DirectInput.Key.Q)) AddRadius(-.1f);
-            if (Input.KeyIsDown(SlimDX.DirectInput.Key.E)) AddRadius(0.1f);
-
-            if (Input.KeyIsDown(SlimDX.DirectInput.Key.J)) MoveRelativeToScreen(-.1f, 0);
-            if (Input.KeyIsDown(SlimDX.DirectInput.Key.L)) MoveRelativeToScreen(0.1f, 0);
-            if (Input.KeyIsDown(SlimDX.DirectInput.Key.I)) MoveRelativeToScreen(0, 0.1f);
-            if (Input.KeyIsDown(SlimDX.DirectInput.Key.K)) MoveRelativeToScreen(0, -.1f);
+            AddRadius(Input.mousePos.Z / -500);
+            if(!Input.KeyIsDown(Key.LeftShift) && Input.MMBPressed)
+            {
+                Rotate(Input.mousePos.X / 150F, Input.mousePos.Y / 150F);
+            }
+            if (Input.KeyIsDown(Key.LeftShift) && Input.MMBPressed)
+            {
+                MoveRelativeToScreen(-Input.mousePos.X, Input.mousePos.Y);
+            }
 
         }
         public void SetModelMatrix(Matrix m)
