@@ -117,7 +117,7 @@ namespace SMEditor
         public static void Draw() { Draw(null, null); }
         public static void Draw(object o, System.Windows.Forms.PaintEventArgs e)
         {
-            viewport.Clear(System.Drawing.Color.DarkGray);
+            viewport.Clear(System.Drawing.Color.DarkGray); ;
             viewport.Device.ImmediateContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
 
             // Terrain
