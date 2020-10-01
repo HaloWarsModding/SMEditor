@@ -15,6 +15,7 @@ namespace SMEditor
     {
         public Transform t = new Transform();
         static CBData cbData = new CBData();
+        public static float MoveSpeed = .1f;
 
         static Buffer cb;
         static bool init = false;
@@ -71,16 +72,43 @@ namespace SMEditor
             Vector3 vecOutXYZ = new Vector3(vecOut.X, vecOut.Y, vecOut.Z);
             Vector3.Transform(ref vecOutXYZ, ref pitchMat, out vecOut);
 
-            t.position = new Vector3(vecOut.X, vecOut.Y, vecOut.Z);
+            t.position = new Vector3(vecOut.X, vecOut.Y, vecOut.Z) + cameraTarget;
             UpdateViewMatrix();
         }
         public void AddRadius(float f)
         {
             float v = Vector3.Distance(t.position, cameraTarget);
-            if (v < .5f && f < 0) return;
+            if (v < .1f && f < 0) return;
 
             cameraRadius += f;
-            t.position = Vector3.Normalize(t.position - cameraTarget) * cameraRadius;
+            t.position = (Vector3.Normalize(t.position - cameraTarget) * cameraRadius) + cameraTarget;
+            Console.WriteLine(t.position - cameraTarget);
+            UpdateViewMatrix();
+        }
+        public void MoveAbsolute(Vector3 v)
+        {
+            cameraTarget += v;
+            t.position += v;
+            UpdateViewMatrix();
+        }
+        private void MoveRelativeToScreen(float lr, float ud) //left & right
+        {
+            //get roation
+            Vector3 rot = Vector3.Normalize((t.position - cameraTarget));
+            Matrix la = Matrix.LookAtLH(t.position, cameraTarget, Vector3.UnitY);
+
+            Vector3 right = new Vector3(la.M11, 0, la.M31);
+            Vector3 up = new Vector3(la.M12, la.M22, la.M32);
+            right.Normalize();
+            up.Normalize();
+
+            Vector3 moveLR = Vector3.Normalize(new Vector3(right.X, 0, right.Z)) * lr;
+            Vector3 moveUD = Vector3.Normalize(new Vector3(up.X, up.Y, up.Z)) * ud;
+            Vector3 move = Vector3.Normalize(moveLR + moveUD);
+
+            cameraTarget += move * MoveSpeed;
+            t.position += move * MoveSpeed;
+
             UpdateViewMatrix();
         }
 
@@ -97,6 +125,11 @@ namespace SMEditor
 
             if (Input.KeyIsDown(SlimDX.DirectInput.Key.Q)) AddRadius(-.1f);
             if (Input.KeyIsDown(SlimDX.DirectInput.Key.E)) AddRadius(0.1f);
+
+            if (Input.KeyIsDown(SlimDX.DirectInput.Key.J)) MoveRelativeToScreen(-.1f, 0);
+            if (Input.KeyIsDown(SlimDX.DirectInput.Key.L)) MoveRelativeToScreen(0.1f, 0);
+            if (Input.KeyIsDown(SlimDX.DirectInput.Key.I)) MoveRelativeToScreen(0, 0.1f);
+            if (Input.KeyIsDown(SlimDX.DirectInput.Key.K)) MoveRelativeToScreen(0, -.1f);
 
         }
         public void SetModelMatrix(Matrix m)
@@ -123,8 +156,8 @@ namespace SMEditor
             db.Write(mvp);
             db.Position = 0;
 
-            Renderer.viewport.Device.ImmediateContext.VertexShader.SetConstantBuffer(cb, 0);
             Renderer.viewport.Context.UpdateSubresource(new DataBox(0, 0, db), cb, 0);
+            Renderer.viewport.Device.ImmediateContext.VertexShader.SetConstantBuffer(cb, 0);
         }
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     }

@@ -29,7 +29,7 @@ namespace SMEditor
             renderTimer.Tick += new EventHandler(timer_Tick);
             renderTimer.Start();
 
-            GridMesh m = new GridMesh("grid", 10F, 4, null, Color.DarkOliveGreen);
+            GridMesh m = new GridMesh("grid", 16F, 64, null, Color.DarkOliveGreen);
 
             loaded = true;
         }

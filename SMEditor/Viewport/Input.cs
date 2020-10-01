@@ -23,6 +23,7 @@ namespace SMEditor
         }
 
         static Dictionary<Key, bool> keyStates = new Dictionary<Key, bool>();
+        public static Vector2 mousePos = Vector2.Zero;
 
         public static void Poll()
         {
@@ -32,6 +33,8 @@ namespace SMEditor
                 if (kstate.IsPressed(k)) keyStates[k] = true;
                 if (kstate.IsReleased(k)) keyStates[k] = false;
             }
+
+
         }
 
         public static bool KeyIsDown(Key k)
