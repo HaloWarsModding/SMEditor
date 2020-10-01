@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SMEditor
+namespace SMEditor.Editor
 {
     public class Transform
     {

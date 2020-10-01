@@ -60,7 +60,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MainWindow\IUpdateable.cs" />
-    <Compile Include="Viewport\Input.cs" />
+    <Compile Include="Scenario\HWDE\HWDEScenario.cs" />
+    <Compile Include="Editor\EditableFeatures\TerrainChunk.cs" />
+    <Compile Include="Editor\Input.cs" />
     <Compile Include="MainWindow\MainWindow.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -69,9 +71,9 @@
     </Compile>
     <Compile Include="MainWindow\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Viewport\Camera.cs" />
-    <Compile Include="Viewport\Renderer.cs" />
-    <Compile Include="Viewport\Transform.cs" />
+    <Compile Include="Editor\Camera.cs" />
+    <Compile Include="Editor\Renderer.cs" />
+    <Compile Include="Editor\Transform.cs" />
     <EmbeddedResource Include="MainWindow\MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </EmbeddedResource>

@@ -10,13 +10,13 @@ using SlimDX.DirectInput;
 using Buffer = SlimDX.Direct3D11.Buffer;
 using Device = SlimDX.Direct3D11.Device;
 
-namespace SMEditor
+namespace SMEditor.Editor
 {
     public class Camera : IUpdateable
     {
         public Transform t = new Transform();
         static CBData cbData = new CBData();
-        public static float MoveSpeed = .2f;
+        public static float MoveSpeed = .1f;
 
         static Buffer cb;
         static bool init = false;
@@ -62,8 +62,8 @@ namespace SMEditor
             
             Vector3 cameraFocusVector = t.position - cameraTarget;
             
-            if (cameraDirection.Y < -.9900f && pitch > 0) pitch = 0;
-            if (cameraDirection.Y > .9900f && pitch < 0) pitch = 0;
+            if (cameraDirection.Y < -.9000f && pitch > 0) pitch = 0;
+            if (cameraDirection.Y > .9000f && pitch < 0) pitch = 0;
 
             Matrix pitchMat = Matrix.RotationAxis(cameraRight, pitch);
             Matrix yawMat = Matrix.RotationAxis(worldUp, yaw);
@@ -79,11 +79,10 @@ namespace SMEditor
         public void AddRadius(float f)
         {
             float v = Vector3.Distance(t.position, cameraTarget);
-            if (v < .1f && f < 0) return;
+            if (v < .25f && f < 0) return;
 
             cameraRadius += f;
             t.position = (Vector3.Normalize(t.position - cameraTarget) * cameraRadius) + cameraTarget;
-            Console.WriteLine(t.position - cameraTarget);
             UpdateViewMatrix();
         }
         public void MoveAbsolute(Vector3 v)
@@ -92,7 +91,7 @@ namespace SMEditor
             t.position += v;
             UpdateViewMatrix();
         }
-        private void MoveRelativeToScreen(float lr, float ud) //left & right
+        private void MoveRelativeToScreen(float lr, float ud)
         {
             //get roation
             Vector3 rot = Vector3.Normalize((t.position - cameraTarget));
@@ -104,8 +103,8 @@ namespace SMEditor
             up.Normalize();
 
             Vector3 moveLR = Vector3.Normalize(new Vector3(right.X, 0, right.Z)) * lr;
-            Vector3 moveUD = Vector3.Normalize(new Vector3(up.X, up.Y, up.Z)) * ud;
-            Vector3 move = Vector3.Normalize(moveLR + moveUD);
+            Vector3 moveUD = Vector3.Normalize(new Vector3(up.X, 0, up.Z)) * ud;
+            Vector3 move = moveLR + moveUD;
 
             cameraTarget += move * MoveSpeed;
             t.position += move * MoveSpeed;
@@ -120,14 +119,14 @@ namespace SMEditor
         public override void Update()
         {
 
-            AddRadius(Input.mousePos.Z / -500);
+            AddRadius(Input.mouseDeltaPos.Z / -10);
             if(!Input.KeyIsDown(Key.LeftShift) && Input.MMBPressed)
             {
-                Rotate(Input.mousePos.X / 150F, Input.mousePos.Y / 150F);
+                Rotate(Input.mouseDeltaPos.X / 150F, Input.mouseDeltaPos.Y / 150F);
             }
             if (Input.KeyIsDown(Key.LeftShift) && Input.MMBPressed)
             {
-                MoveRelativeToScreen(-Input.mousePos.X, Input.mousePos.Y);
+                MoveRelativeToScreen(-Input.mouseDeltaPos.X, Input.mouseDeltaPos.Y);
             }
 
         }

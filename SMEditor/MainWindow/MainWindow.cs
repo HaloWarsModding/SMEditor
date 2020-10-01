@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using SlimDX;
+using SMEditor.Editor;
+using SMEditor.Scenario.HWDE;
 
 namespace SMEditor
 {
@@ -18,8 +20,8 @@ namespace SMEditor
             InitializeComponent();
         }
 
+        //d3d11Control
         bool loaded = false;
-        Timer renderTimer = new Timer();
         private void d3D11Control_Load(object sender, EventArgs e)
         {
             Renderer.Init();
@@ -29,17 +31,29 @@ namespace SMEditor
             renderTimer.Tick += new EventHandler(timer_Tick);
             renderTimer.Start();
 
-            GridMesh m = new GridMesh("grid", 16F, 64, null, Color.DarkOliveGreen);
+            HWDEScenario s = new HWDEScenario(new HWDEScenarioDescription(
+                HWDEScenarioDescription.Size._256x256, 
+                HWDEScenarioDescription.SimResolution._4x));
 
             loaded = true;
         }
-
         private void d3D11Control_Resize(object sender, EventArgs e)
         {
             if(loaded) Renderer.mainCamera.UpdateProjMatrix();
         }
 
+        //mainwindow
+        private void window_GotFocus(object o, EventArgs e)
+        {
+            if(loaded) Input.Init();
+        }
+        private void window_LostFocus(object o, EventArgs e)
+        {
 
+        }
+
+
+        Timer renderTimer = new Timer();
         public static List<IUpdateable> updateables = new List<IUpdateable>();
         private void timer_Tick(object sender, EventArgs e)
         {

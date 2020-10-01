@@ -7,7 +7,7 @@ using SlimDX;
 using SlimDX.DirectInput;
 using SlimDX.RawInput;
 
-namespace SMEditor
+namespace SMEditor.Editor
 {
     static class Input
     {
@@ -23,7 +23,7 @@ namespace SMEditor
             keyboard.Acquire();
 
             mouse = new Mouse(input);
-            mouse.SetCooperativeLevel(Renderer.viewport.ParentForm, CooperativeLevel.Foreground | CooperativeLevel.Nonexclusive);
+            mouse.SetCooperativeLevel(Renderer.viewport.ParentForm, CooperativeLevel.Nonexclusive | CooperativeLevel.Background);
             mouse.Acquire();
         }
 
@@ -31,7 +31,7 @@ namespace SMEditor
         public static bool LMBPressed = false;
         public static bool RMBPressed = false;
         public static bool MMBPressed = false;
-        public static Vector3 mousePos = Vector3.Zero;
+        public static Vector3 mouseDeltaPos = Vector3.Zero;
 
         public static void Poll()
         {
@@ -48,7 +48,7 @@ namespace SMEditor
             RMBPressed = mState.GetButtons()[1];
             MMBPressed = mState.GetButtons()[2];
 
-            mousePos = new Vector3(mState.X, mState.Y, mState.Z);
+            mouseDeltaPos = new Vector3(mState.X, mState.Y, mState.Z);
         }
 
         public static bool KeyIsDown(Key k)
