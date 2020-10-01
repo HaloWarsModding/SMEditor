@@ -114,7 +114,7 @@ namespace SMEditor
             cbData.viewMatrix = Matrix.LookAtLH(t.position, cameraTarget, new Vector3(0, 1, 0));
             UpdateCameraBuffer();
         }
-        private void UpdateCameraBuffer()
+        public void UpdateCameraBuffer()
         {
             Matrix mvp = cbData.modelMatrix * cbData.viewMatrix * cbData.projMatrix;
             mvp = Matrix.Transpose(mvp);

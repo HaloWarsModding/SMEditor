@@ -29,14 +29,7 @@ namespace SMEditor
             renderTimer.Tick += new EventHandler(timer_Tick);
             renderTimer.Start();
 
-            List<TerrainVertex> tvs = new List<TerrainVertex>()
-            {
-                new TerrainVertex(new Vector3(1f,  0f,  1f)),
-                new TerrainVertex(new Vector3(-1f, 0f,  1f)),
-                new TerrainVertex(new Vector3(1f,  0f, -1f)),
-                new TerrainVertex(new Vector3(-1f, 0f, -1f))
-            };
-            Renderer.CreateTerrainMesh("0,0", tvs, new List<uint>() { 0, 2, 1, 1, 2, 3 });
+            GridMesh m = new GridMesh("grid", 10F, 4, null, Color.DarkOliveGreen);
 
             loaded = true;
         }
