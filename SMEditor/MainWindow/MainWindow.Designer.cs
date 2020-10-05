@@ -123,8 +123,6 @@
             this.Name = "MainWindow";
             this.Text = "SMEditor";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
-            this.GotFocus += new System.EventHandler(window_GotFocus);
-            this.LostFocus += new System.EventHandler(window_LostFocus);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.tableLayoutPanel1.ResumeLayout(false);

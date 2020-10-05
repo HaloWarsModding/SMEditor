@@ -1,29 +1,55 @@
 ﻿cbuffer cbMatrices : register( b0 ) {
-	float4x4 mvp;
+	float4x4 m;
+	float4x4 v;
+	float4x4 p;
 }
 
 struct vs_input
 {
-	float3 position_in : POSITION_IN;
-	float3 color_in : COLOR_IN;
-	float2 uv_in : UV_IN;
+	float3 pos : POSITION_IN;
 };
 
-struct vs_output
+struct gsps_input
 {
-	float4 position_out : SV_POSITION;
-	float3 color_out : COLOR_OUT;
-	float2 uv_out : UV_OUT;
+	float4 pos : SV_POSITION;
+	float4 color : COLOR_GSPS;
 };
 
-vs_output vs(vs_input input)
+gsps_input vs(vs_input input)
 {
-	vs_output output;
-	output.position_out =  mul(float4(input.position_in, 1), mvp);
+	gsps_input output;
+	float4x4 vp = mul(v, p);
+	output.pos = mul(float4(input.pos, 1), vp);
 	return output;
 }
 
-float4 ps(vs_output output) : SV_TARGET
+[maxvertexcount(12)]
+void gsTri(triangle gsps_input input[3] : SV_POSITION, inout TriangleStream<gsps_input> tris)
 {
-	return float4(1.0f, 1.0f, 0.0f, 1.0f);
+	gsps_input output;
+	
+	for (int i = 0; i < 3; i++)
+	{
+		output.pos = input[i].pos;
+		output.color = float4(1, 1, 0, 1);
+		tris.Append(output);
+	}
+	tris.RestartStrip();
+
+}
+[maxvertexcount(12)]
+void gsVert(point gsps_input input[1] : SV_POSITION, inout PointStream<gsps_input> tris)
+{
+	gsps_input output;
+
+	output.pos = input[0].pos + float4(0, .01F, 0, 0);
+	output.color = float4(0, 0, 0, 1);
+	tris.Append(output);
+
+	tris.RestartStrip();
+}
+
+float4 ps(gsps_input input) : SV_TARGET
+{
+	return input.color;
 }

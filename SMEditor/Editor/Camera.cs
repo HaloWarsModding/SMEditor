@@ -15,10 +15,10 @@ namespace SMEditor.Editor
     public class Camera : IUpdateable
     {
         public Transform t = new Transform();
-        static CBData cbData = new CBData();
+        public static CBData cbData = new CBData();
         public static float MoveSpeed = .1f;
 
-        static Buffer cb;
+        public static Buffer cb;
         static bool init = false;
         public Camera()
         {
@@ -27,11 +27,10 @@ namespace SMEditor.Editor
                 cbData.projMatrix = Matrix.Identity;
                 cbData.viewMatrix = Matrix.Identity;
                 cbData.modelMatrix = Matrix.Identity;
-                CBData.stride = Marshal.SizeOf(new CBData());
                 cb = new Buffer(Renderer.viewport.Device, 
                     new BufferDescription {
                         Usage = ResourceUsage.Default,
-                        SizeInBytes = CBData.stride,
+                        SizeInBytes = sizeof(float) * 16 * 3,
                         BindFlags = BindFlags.ConstantBuffer
                     });
 
@@ -48,7 +47,7 @@ namespace SMEditor.Editor
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// Move fucntions.
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        Vector3 cameraTarget = new Vector3(0,0,0);
+        public Vector3 cameraTarget = new Vector3(0,0,0);
         float cameraRadius = 0f;
         public void Rotate(float yaw, float pitch)
         {
@@ -79,7 +78,7 @@ namespace SMEditor.Editor
         public void AddRadius(float f)
         {
             float v = Vector3.Distance(t.position, cameraTarget);
-            if (v < .25f && f < 0) return;
+            if (v + f < .25f && f < 0) return;
 
             cameraRadius += f;
             t.position = (Vector3.Normalize(t.position - cameraTarget) * cameraRadius) + cameraTarget;
@@ -124,7 +123,11 @@ namespace SMEditor.Editor
             {
                 Rotate(Input.mouseDeltaPos.X / 150F, Input.mouseDeltaPos.Y / 150F);
             }
-            if (Input.KeyIsDown(Key.LeftShift) && Input.MMBPressed)
+            if (Input.KeyIsDown(Key.LeftShift) && Input.MMBPressed && !Input.KeyIsDown(Key.LeftAlt))
+            {
+                MoveRelativeToScreen(-Input.mouseDeltaPos.X * 10F, Input.mouseDeltaPos.Y * 10F);
+            }
+            if (Input.KeyIsDown(Key.LeftShift) && Input.MMBPressed && Input.KeyIsDown(Key.LeftAlt))
             {
                 MoveRelativeToScreen(-Input.mouseDeltaPos.X, Input.mouseDeltaPos.Y);
             }
@@ -137,7 +140,7 @@ namespace SMEditor.Editor
         }
         public void UpdateProjMatrix()
         {
-            cbData.projMatrix = Matrix.PerspectiveFovLH(70F, (float)Renderer.viewport.Width / (float)Renderer.viewport.Height, 0.01F, 1000F);
+            cbData.projMatrix = Matrix.PerspectiveFovLH(70F, (float)Renderer.viewport.Width / (float)Renderer.viewport.Height, 0.01F, 100000F);
             UpdateCameraBuffer();
         }
         public void UpdateViewMatrix()
@@ -150,8 +153,10 @@ namespace SMEditor.Editor
             Matrix mvp = cbData.modelMatrix * cbData.viewMatrix * cbData.projMatrix;
             mvp = Matrix.Transpose(mvp);
 
-            var db = new DataStream(Marshal.SizeOf(new Matrix()), true, true);
-            db.Write(mvp);
+            var db = new DataStream(sizeof(float) * 16 * 3, true, true);
+            db.Write(Matrix.Transpose(cbData.modelMatrix));
+            db.Write(Matrix.Transpose(cbData.viewMatrix));
+            db.Write(Matrix.Transpose(cbData.projMatrix));
             db.Position = 0;
 
             Renderer.viewport.Context.UpdateSubresource(new DataBox(0, 0, db), cb, 0);
@@ -161,12 +166,10 @@ namespace SMEditor.Editor
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct CBData
+    public struct CBData
     {
-
         public Matrix projMatrix,
                       viewMatrix,
                       modelMatrix;
-        public static int stride;
     }
 }
