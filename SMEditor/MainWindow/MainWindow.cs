@@ -34,7 +34,7 @@ namespace SMEditor
             renderTimer.Start();
 
             //HWDEScenario s = new HWDEScenario(new HWDEScenarioDescription(HWDEScenarioDescription.Size._256x256, HWDEScenarioDescription.SimResolution._4x));
-            TerrainChunk t = new TerrainChunk(256, 256);
+            World.terrain = new Terrain(256);
 
             loaded = true;
         }

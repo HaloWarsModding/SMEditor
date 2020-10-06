@@ -10,7 +10,7 @@ namespace SMEditor.Editor
 {
     public static class World
     {
-        public static List<TerrainChunk> chunks = new List<TerrainChunk>();
+        public static Terrain terrain;
 
         public static bool CastRay(Vector2 start, Vector3 dir)
         {

@@ -18,8 +18,9 @@ struct gsps_input
 gsps_input vs(vs_input input)
 {
 	gsps_input output;
-	float4x4 vp = mul(v, p);
-	output.pos = mul(float4(input.pos, 1), vp);
+	float4x4 mv = mul(m, v);
+	float4x4 mvp = mul(mv, p);
+	output.pos = mul(float4(input.pos, 1), mvp);
 	return output;
 }
 

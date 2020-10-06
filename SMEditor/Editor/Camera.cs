@@ -158,8 +158,9 @@ namespace SMEditor.Editor
             db.Write(Matrix.Transpose(cbData.viewMatrix));
             db.Write(Matrix.Transpose(cbData.projMatrix));
             db.Position = 0;
-
+            
             Renderer.viewport.Context.UpdateSubresource(new DataBox(0, 0, db), cb, 0);
+
             Renderer.viewport.Device.ImmediateContext.VertexShader.SetConstantBuffer(cb, 0);
         }
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

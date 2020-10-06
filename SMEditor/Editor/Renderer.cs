@@ -10,6 +10,7 @@ using SlimDX.Direct3D11;
 using SlimDX.DXGI;
 using Buffer = SlimDX.Direct3D11.Buffer;
 using SMEditor.Editor;
+using MapFlags = SlimDX.Direct3D11.MapFlags;
 
 namespace SMEditor
 {
@@ -226,50 +227,60 @@ namespace SMEditor
         public Vector3 location = new Vector3(0,0,0);
         public Vector3 scale = new Vector3(1,1,1);
 
+        BufferDescription ibd;
+        BufferDescription vbd;
+
         public BasicMesh()
         {
         }
-        public virtual void Init(List<BasicVertex> vertices, List<uint> indices)
+        public virtual void Init(List<BasicVertex> vertices, List<int> indices)
         {
-            DataStream vstream = new DataStream(vertices.ToArray(), true, false); vstream.Position = 0;
-            DataStream istream = new DataStream(indices.ToArray(), true, false); istream.Position = 0;
+            DataStream vd = new DataStream(vertices.ToArray(), true, true); vd.Position = 0;
+            DataStream id = new DataStream(indices.ToArray(), true, true); id.Position = 0;
 
-            var vbd = new BufferDescription(
+            vbd = new BufferDescription(
             Marshal.SizeOf(new BasicVertex()) * vertices.Count,
             ResourceUsage.Dynamic,
             BindFlags.VertexBuffer,
             CpuAccessFlags.Write,
             ResourceOptionFlags.None, 0);
-            vb = new Buffer(Renderer.viewport.Device, vstream, vbd);
+            vb = new Buffer(Renderer.viewport.Device, vbd);
             vbind = new VertexBufferBinding(vb, Marshal.SizeOf(new BasicVertex()), 0);
 
             //indices
-            var ibd = new BufferDescription(
+            ibd = new BufferDescription(
             sizeof(uint) * indices.Count,
             ResourceUsage.Dynamic,
             BindFlags.IndexBuffer,
             CpuAccessFlags.Write,
             ResourceOptionFlags.None, 0);
-            ib = new Buffer(Renderer.viewport.Device, istream, ibd);
+            ib = new Buffer(Renderer.viewport.Device, ibd);
 
             indexCount = indices.Count;
-
         }
         public virtual void Draw()
         {
-            Renderer.mainCamera.SetModelMatrix(Matrix.Transformation(
-                new Vector3(0, 0, 0), Quaternion.Identity,
-                new Vector3(1, 1, 1), new Vector3(0, 0, 0), 
-                Quaternion.Identity, location));
-
             Renderer.viewport.Device.ImmediateContext.InputAssembler.SetVertexBuffers(0, vbind);
-            Renderer.viewport.Device.ImmediateContext.InputAssembler.SetIndexBuffer(ib, Format.R32_UInt, 0);
+            Renderer.viewport.Device.ImmediateContext.InputAssembler.SetIndexBuffer(ib, Format.R32_SInt, 0);
             Renderer.viewport.Device.ImmediateContext.DrawIndexed(indexCount, 0, 0);
         }
-        public void UpdateData(List<BasicVertex> vertices, List<uint> indices)
+        public virtual void UpdateData(List<BasicVertex> vertices, List<int> indices)
         {
+            DataStream vd = new DataStream(vertices.ToArray(), true, true); vd.Position = 0;
+            DataStream id = new DataStream(indices.ToArray(), true, true); id.Position = 0;
 
+            Console.WriteLine(indices.Count());
 
+            vb = new Buffer(Renderer.viewport.Device, vd, vbd);
+            ib = new Buffer(Renderer.viewport.Device, id, ibd);
+
+            //Renderer.viewport.Context.MapSubresource(ib, MapMode.WriteDiscard, MapFlags.None);
+            //Renderer.viewport.Context.UpdateSubresource(new DataBox(0, 0, id), ib, 0);
+            //Renderer.viewport.Context.UnmapSubresource(ib, 0);
+
+            //Renderer.viewport.Context.MapSubresource(vb, MapMode.WriteDiscard, MapFlags.None);
+            //Renderer.viewport.Context.UpdateSubresource(new DataBox(0, 0, vd), vb, 0);
+            //Renderer.viewport.Context.UnmapSubresource(vb, 0);
         }
     }
 
@@ -277,95 +288,16 @@ namespace SMEditor
     {
         public static bool drawPoints = false;
 
-        BasicMesh vertexMesh;
-        Buffer instanceData;
-        VertexBufferBinding instVBind;
-        int instanceCount = 0;
-
         public TerrainMesh() { }
-        public override void Init(List<BasicVertex> vertices, List<uint> indices)
+        public override void Init(List<BasicVertex> vertices, List<int> indices)
         {
-            //Set up vertex mesh
-            Vector3 color = new Vector3(1, 0, 0);
-            Vector3 v = new Vector3(0, 0, 0);
-            List<BasicVertex> bvs = new List<BasicVertex>()
-            {
-            new BasicVertex(new Vector3(-0.5F + v.X, -0.5F + v.Y, 0.5F + v.Z), color),
-            new BasicVertex(new Vector3(0.5F + v.X, -0.5F + v.Y, 0.5F + v.Z), color),
-            new BasicVertex(new Vector3(0.5F + v.X, 0.5F + v.Y, 0.5F + v.Z), color),
-            new BasicVertex(new Vector3(-0.5F + v.X, 0.5F + v.Y, 0.5F + v.Z), color),
-
-            new BasicVertex(new Vector3(-0.5F + v.X, -0.5F + v.Y, -0.5F + v.Z), color),
-            new BasicVertex(new Vector3(0.5F + v.X, -0.5F + v.Y, -0.5F + v.Z), color),
-            new BasicVertex(new Vector3(0.5F + v.X, 0.5F + v.Y, -0.5F + v.Z), color),
-            new BasicVertex(new Vector3(-0.5F + v.X, 0.5F + v.Y, -0.5F + v.Z), color)
-            };
-            List<uint> inds = new List<uint>()
-            {
-        // front
-		0, 1, 2,
-        2, 3, 0,
-		// right
-		1, 5, 6,
-        6, 2, 1,
-		// back
-		7, 6, 5,
-        5, 4, 7,
-		// left
-		4, 0, 3,
-        3, 7, 4,
-		// bottom
-		4, 5, 1,
-        1, 0, 4,
-		// top
-		3, 2, 6,
-        6, 7, 3
-            };
-            vertexMesh = new BasicMesh();
-            vertexMesh.Init(bvs, inds);
-            
-            var db = new DataStream((sizeof(float) * 3) * vertices.Count, true, true);
-            foreach(BasicVertex bv in vertices)
-            {
-                db.Write(bv.position);
-            }
-            db.Position = 0;
-            instanceData = new Buffer(Renderer.viewport.Device, db,
-            new BufferDescription (
-                (sizeof(float) * 3) * vertices.Count,
-                ResourceUsage.Dynamic,
-                BindFlags.VertexBuffer,
-                CpuAccessFlags.Write,
-                ResourceOptionFlags.None,
-                0));
-            
-            instanceCount = vertices.Count;
-
-            instVBind = new VertexBufferBinding(instanceData, 12, 0);
-
-            //Set up main mesh
             base.Init(vertices, indices);
         }
         public override void Draw()
         {
+            Renderer.mainCamera.SetModelMatrix(Matrix.Transformation(new Vector3(0, 0, 0),
+                Quaternion.Identity, new Vector3(1, 1, 1), new Vector3(0, 0, 0), Quaternion.Identity, new Vector3(0, 0, 0)));
             base.Draw();
-            
-            if(drawPoints)
-            {
-                Renderer.viewport.Device.ImmediateContext.Rasterizer.State = Renderer.boldVertRS;
-                Renderer.viewport.Device.ImmediateContext.VertexShader.Set(Renderer.boldVertVS);
-                Renderer.viewport.Device.ImmediateContext.PixelShader.Set(Renderer.boldVertPS);
-                Renderer.viewport.Device.ImmediateContext.InputAssembler.InputLayout = Renderer.boldVertInpl;
-
-                Renderer.viewport.Device.ImmediateContext.InputAssembler.SetVertexBuffers(0, vertexMesh.vbind);
-                Renderer.viewport.Device.ImmediateContext.InputAssembler.SetVertexBuffers(1, instVBind);
-
-                Renderer.viewport.Device.ImmediateContext.InputAssembler.SetIndexBuffer(vertexMesh.ib, Format.R32_UInt, 0);
-                Renderer.viewport.Device.ImmediateContext.DrawIndexedInstanced(36, 2, 0, 0, 0);
-                ///
-
-
-            }
         }
     }
 

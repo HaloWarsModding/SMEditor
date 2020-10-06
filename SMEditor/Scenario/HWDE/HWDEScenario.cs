@@ -25,7 +25,7 @@ namespace SMEditor.Scenario.HWDE
     }
     public class HWDEScenario
     {
-        private TerrainChunk[,] terrainChunks;
+        private Terrain[,] terrainChunks;
         public HWDEScenario(HWDEScenarioDescription desc)
         {
             int chunksPerAxis;
@@ -35,12 +35,12 @@ namespace SMEditor.Scenario.HWDE
             else if (desc.size == HWDEScenarioDescription.Size._2048x2048) chunksPerAxis = 32;
             else return;
 
-            terrainChunks = new TerrainChunk[chunksPerAxis, chunksPerAxis];
+            terrainChunks = new Terrain[chunksPerAxis, chunksPerAxis];
             for(int i = 0; i < chunksPerAxis; i++)
             {
                 for(int j = 0; j < chunksPerAxis; j++)
                 {
-                    terrainChunks[i, j] = new TerrainChunk(64, 64, new Vector3(100,300,100), new Vector3(i*64, 0, j*64));
+                    //terrainChunks[i, j] = new Terrain(64, 64, new Vector3(100,300,100), new Vector3(i*64, 0, j*64));
                 }
             }
 
