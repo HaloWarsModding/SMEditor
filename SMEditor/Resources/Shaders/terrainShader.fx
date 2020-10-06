@@ -1,4 +1,4 @@
-﻿cbuffer cbMatrices : register( b0 ) {
+﻿cbuffer cbMatrices : register(b0) {
 	float4x4 m;
 	float4x4 v;
 	float4x4 p;
@@ -25,10 +25,10 @@ gsps_input vs(vs_input input)
 }
 
 [maxvertexcount(12)]
-void gsTri(triangle gsps_input input[3] : SV_POSITION, inout TriangleStream<gsps_input> tris)
+void gs(triangle gsps_input input[3] : SV_POSITION, inout TriangleStream<gsps_input> tris)
 {
 	gsps_input output;
-	
+
 	for (int i = 0; i < 3; i++)
 	{
 		output.pos = input[i].pos;
@@ -54,3 +54,4 @@ float4 ps(gsps_input input) : SV_TARGET
 {
 	return input.color;
 }
+

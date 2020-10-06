@@ -29,11 +29,11 @@ namespace SMEditor.Editor
 
             dMesh = new DMesh3(MeshComponents.VertexColors);
 
-            for (int i = 0; i <= size; i++)
+            for (int i = 0; i <= size + 1; i++)
             {
-                for (int j = 0; j <= size; j++)
+                for (int j = 0; j <= size + 1; j++)
                 {
-                    Vector3d v = new Vector3d(i, 0, j);
+                    Vector3d v = new Vector3d((float)i, 0, (float)j);
 
                     dMesh.AppendVertex(new NewVertexInfo(v, new Vector3f(0,0,1)));
                 }
@@ -89,8 +89,7 @@ namespace SMEditor.Editor
             visualMesh = new TerrainMesh();
             visualMesh.Init(bvs, inds);
             Renderer.terrainMeshes.Add(visualMesh);
-
-            visualMesh.UpdateData(bvs, inds);
+            
         }
     }
 }

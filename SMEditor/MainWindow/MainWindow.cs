@@ -32,8 +32,7 @@ namespace SMEditor
             renderTimer.Interval = 20; //ms
             renderTimer.Tick += new EventHandler(timer_Tick);
             renderTimer.Start();
-
-            //HWDEScenario s = new HWDEScenario(new HWDEScenarioDescription(HWDEScenarioDescription.Size._256x256, HWDEScenarioDescription.SimResolution._4x));
+            
             World.terrain = new Terrain(256);
 
             loaded = true;

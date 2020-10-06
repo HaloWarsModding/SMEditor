@@ -10,7 +10,6 @@ using SlimDX.Direct3D11;
 using SlimDX.DXGI;
 using Buffer = SlimDX.Direct3D11.Buffer;
 using SMEditor.Editor;
-using MapFlags = SlimDX.Direct3D11.MapFlags;
 
 namespace SMEditor
 {
@@ -22,149 +21,19 @@ namespace SMEditor
         {
             viewport = Program.mainWindow.d3D11Control;
             mainCamera = new Camera();
-            InitTerrain();
-            InitGrid();
-            InitboldVert();
-        }
 
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        // Terrain specifics
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        public static List<BasicMesh> terrainMeshes = new List<BasicMesh>();
-        public static RasterizerState terrainRS;
-        static ShaderSignature terrainSig;
-        public static VertexShader terrainVS;
-        public static PixelShader terrainPS;
-        public static GeometryShader terrainGS_Tri;
-        public static GeometryShader terrainGS_Vert;
-        public static InputLayout terrainInpl;
-        private static void InitTerrain()
-        {
-            //Shaders
-            using (var b = ShaderBytecode.CompileFromFile("Shaders\\terrainShader.fx", "vs", "vs_4_0", ShaderFlags.None, EffectFlags.None))
-            {
-                terrainSig = ShaderSignature.GetInputSignature(b);
-                terrainVS = new VertexShader(viewport.Device, b);
-            }
-            using (var b = ShaderBytecode.CompileFromFile("Shaders\\terrainShader.fx", "ps", "ps_4_0", ShaderFlags.None, EffectFlags.None))
-            {
-                terrainPS = new PixelShader(viewport.Device, b);
-            }
-            using (var b = ShaderBytecode.CompileFromFile("Shaders\\terrainShader.fx", "gsTri", "gs_4_0", ShaderFlags.None, EffectFlags.None))
-            {
-                terrainGS_Tri = new GeometryShader(viewport.Device, b);
-            }
-            using (var b = ShaderBytecode.CompileFromFile("Shaders\\terrainShader.fx", "gsVert", "gs_4_0", ShaderFlags.None, EffectFlags.None))
-            {
-                terrainGS_Vert = new GeometryShader(viewport.Device, b);
-            }
-
-            //InputLayout
-            var vertDesc = new[]
+            passes.Add("terrain", new RenderPass("terrain", new[]
             {
                 new InputElement("POSITION_IN", 0, Format.R32G32B32_Float, 0),
                 new InputElement("COLOR_IN", 0, Format.R32G32B32_Float, 12, 0)
-            };
-            terrainInpl = new InputLayout(viewport.Device, terrainSig, vertDesc);
+            }));
 
-            //Rasterizer state
-            var wireFrameDesc = new RasterizerStateDescription
-            {
-                FillMode = FillMode.Solid,
-                CullMode = CullMode.None,
-                IsFrontCounterclockwise = false,
-                IsDepthClipEnabled = true
-            };
-            terrainRS = RasterizerState.FromDescription(viewport.Device, wireFrameDesc);
+            //InitTerrain();
+            //InitGrid();
+            //InitboldVert();
         }
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        // BoldVertex specifics
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        public static List<BasicMesh> boldVertMeshes = new List<BasicMesh>();
-        public static RasterizerState boldVertRS;
-        static ShaderSignature boldVertSig;
-        public static VertexShader boldVertVS;
-        public static PixelShader boldVertPS;
-        public static InputLayout boldVertInpl;
-        private static void InitboldVert()
-        {
-            //Shaders
-            using (var b = ShaderBytecode.CompileFromFile("Shaders\\boldVertShader.fx", "vs", "vs_4_0", ShaderFlags.None, EffectFlags.None))
-            {
-                boldVertSig = ShaderSignature.GetInputSignature(b);
-                boldVertVS = new VertexShader(viewport.Device, b);
-            }
-            using (var b = ShaderBytecode.CompileFromFile("Shaders\\boldVertShader.fx", "ps", "ps_4_0", ShaderFlags.None, EffectFlags.None))
-            {
-                boldVertPS = new PixelShader(viewport.Device, b);
-            }
-
-            //InputLayout
-            var vertDesc = new[]
-            {
-                new InputElement("POSITION_IN", 0, Format.R32G32B32_Float, 0, 0, InputClassification.PerVertexData, 0),
-                new InputElement("COLOR_IN", 0, Format.R32G32B32_Float, 12, 0, InputClassification.PerVertexData, 0),
-                new InputElement("INST_POS", 0, Format.R32G32B32_Float, 24, 1, InputClassification.PerInstanceData, 0),
-            };
-            boldVertInpl = new InputLayout(viewport.Device, boldVertSig, vertDesc);
-
-            //Rasterizer state
-            var wireFrameDesc = new RasterizerStateDescription
-            {
-                FillMode = FillMode.Solid,
-                CullMode = CullMode.None,
-                IsFrontCounterclockwise = false,
-                IsDepthClipEnabled = true
-            };
-            boldVertRS = RasterizerState.FromDescription(viewport.Device, wireFrameDesc);
-        }
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        // Grid specifics
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        public static List<GridMesh> gridMeshes = new List<GridMesh>();
-        static RasterizerState gridRS;
-        static ShaderSignature gridSig;
-        static VertexShader gridVS;
-        static PixelShader gridPS;
-        static InputLayout gridInpl;
-        private static void InitGrid()
-        {
-            //Shaders
-            using (var b = ShaderBytecode.CompileFromFile("Shaders\\gridShader.fx", "vs", "vs_4_0", ShaderFlags.None, EffectFlags.None))
-            {
-                gridSig = ShaderSignature.GetInputSignature(b);
-                gridVS = new VertexShader(viewport.Device, b);
-            }
-            using (var b = ShaderBytecode.CompileFromFile("Shaders\\gridShader.fx", "ps", "ps_4_0", ShaderFlags.None, EffectFlags.None))
-            {
-                gridPS = new PixelShader(viewport.Device, b);
-            }
-
-            //InputLayout
-            var vertDesc = new[]
-            {
-                new InputElement("POSITION_IN", 0, Format.R32G32B32_Float, 0),
-                new InputElement("COLOR_IN", 0, Format.R32G32B32_Float, 12, 0)
-            };
-            gridInpl = new InputLayout(viewport.Device, gridSig, vertDesc);
-
-            //Rasterizer state
-            var wireFrameDesc = new RasterizerStateDescription
-            {
-                FillMode = FillMode.Wireframe,
-                CullMode = CullMode.None,
-                IsFrontCounterclockwise = false,
-                IsDepthClipEnabled = true
-            };
-            gridRS = RasterizerState.FromDescription(viewport.Device, wireFrameDesc);
-        }
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        public static Dictionary<string, RenderPass> passes = new Dictionary<string, RenderPass>();
         
         
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -178,29 +47,8 @@ namespace SMEditor
 
             mainCamera.UpdateCameraBuffer();
 
-            // Terrain
-            viewport.Device.ImmediateContext.Rasterizer.State = terrainRS;
-            viewport.Device.ImmediateContext.VertexShader.Set(terrainVS);
-            viewport.Device.ImmediateContext.PixelShader.Set(terrainPS);
-            viewport.Device.ImmediateContext.InputAssembler.InputLayout = terrainInpl;
-
-            viewport.Device.ImmediateContext.GeometryShader.Set(terrainGS_Tri);
-            foreach (BasicMesh m in terrainMeshes) m.Draw();
-
-            if (TerrainMesh.drawPoints) {
-                viewport.Device.ImmediateContext.GeometryShader.Set(terrainGS_Vert);
-                foreach (BasicMesh m in terrainMeshes) m.Draw();
-            }
-
-            // Grid
-            viewport.Device.ImmediateContext.Rasterizer.State = gridRS;
-            viewport.Device.ImmediateContext.VertexShader.Set(gridVS);
-            viewport.Device.ImmediateContext.PixelShader.Set(gridPS);
-            viewport.Device.ImmediateContext.InputAssembler.InputLayout = gridInpl;
-            foreach (GridMesh m in gridMeshes)
-            {
-                m.Draw();
-            }
+            passes["terrain"].Use();
+            foreach (TerrainMesh m in terrainMeshes) m.Draw();
 
             viewport.Present();
         }
@@ -254,9 +102,11 @@ namespace SMEditor
             BindFlags.IndexBuffer,
             CpuAccessFlags.Write,
             ResourceOptionFlags.None, 0);
-            ib = new Buffer(Renderer.viewport.Device, ibd);
+            ib = new Buffer(Renderer.viewport.Device, id, ibd);
 
             indexCount = indices.Count;
+
+            UpdateData(vertices, indices);
         }
         public virtual void Draw()
         {
@@ -267,20 +117,19 @@ namespace SMEditor
         public virtual void UpdateData(List<BasicVertex> vertices, List<int> indices)
         {
             DataStream vd = new DataStream(vertices.ToArray(), true, true); vd.Position = 0;
-            DataStream id = new DataStream(indices.ToArray(), true, true); id.Position = 0;
-
-            Console.WriteLine(indices.Count());
-
+            //DataStream id = new DataStream(indices.ToArray(), true, true); id.Position = 0;
+            
+            //ib = new Buffer(Renderer.viewport.Device, id, ibd);
             vb = new Buffer(Renderer.viewport.Device, vd, vbd);
-            ib = new Buffer(Renderer.viewport.Device, id, ibd);
+            vbind = new VertexBufferBinding(vb, Marshal.SizeOf(new BasicVertex()), 0);
 
-            //Renderer.viewport.Context.MapSubresource(ib, MapMode.WriteDiscard, MapFlags.None);
+            //Renderer.viewport.Context.MapSubresource(vb, MapMode.WriteDiscard, SlimDX.Direct3D11.MapFlags.None);
+            //Renderer.viewport.Context.UpdateSubresource(new DataBox((int)vd.Length, (int)vd.Length, vd), vb, 0);
+            //Renderer.viewport.Context.UnmapSubresource(vb, 0);
+
+            //Renderer.viewport.Context.MapSubresource(ib, MapMode.WriteDiscard, SlimDX.Direct3D11.MapFlags.None);
             //Renderer.viewport.Context.UpdateSubresource(new DataBox(0, 0, id), ib, 0);
             //Renderer.viewport.Context.UnmapSubresource(ib, 0);
-
-            //Renderer.viewport.Context.MapSubresource(vb, MapMode.WriteDiscard, MapFlags.None);
-            //Renderer.viewport.Context.UpdateSubresource(new DataBox(0, 0, vd), vb, 0);
-            //Renderer.viewport.Context.UnmapSubresource(vb, 0);
         }
     }
 
@@ -298,6 +147,10 @@ namespace SMEditor
             Renderer.mainCamera.SetModelMatrix(Matrix.Transformation(new Vector3(0, 0, 0),
                 Quaternion.Identity, new Vector3(1, 1, 1), new Vector3(0, 0, 0), Quaternion.Identity, new Vector3(0, 0, 0)));
             base.Draw();
+        }
+        public override void UpdateData(List<BasicVertex> vertices, List<int> indices)
+        {
+            base.UpdateData(vertices, indices);
         }
     }
 
@@ -399,6 +252,57 @@ namespace SMEditor
             Renderer.viewport.Device.ImmediateContext.InputAssembler.SetVertexBuffers(0, vbind);
             Renderer.viewport.Device.ImmediateContext.InputAssembler.SetIndexBuffer(ib, Format.R32_UInt, 0);
             Renderer.viewport.Device.ImmediateContext.DrawIndexed(indexCount, 0, 0);
+        }
+    }
+
+    class RenderPass
+    {
+        public static List<BasicMesh> Meshes = new List<BasicMesh>();
+        public static RasterizerState RS;
+        static ShaderSignature Sig;
+        public static VertexShader VS;
+        public static PixelShader PS;
+        public static GeometryShader GS_Tri;
+        public static GeometryShader GS_Vert;
+        public static InputLayout Inpl;
+        public RenderPass(string name, InputElement[] inplElems) { Init(name, inplElems); }
+        private static void Init(string name, InputElement[] inplElems)
+        {
+            //Shaders
+            using (var b = ShaderBytecode.CompileFromFile("Shaders\\" + name + "Shader.fx", "vs", "vs_4_0", ShaderFlags.None, EffectFlags.None))
+            {
+                Sig = ShaderSignature.GetInputSignature(b);
+                VS = new VertexShader(Renderer.viewport.Device, b);
+            }
+            using (var b = ShaderBytecode.CompileFromFile("Shaders\\" + name + "Shader.fx", "ps", "ps_4_0", ShaderFlags.None, EffectFlags.None))
+            {
+                PS = new PixelShader(Renderer.viewport.Device, b);
+            }
+            using (var b = ShaderBytecode.CompileFromFile("Shaders\\" + name + "Shader.fx", "gs", "gs_4_0", ShaderFlags.None, EffectFlags.None))
+            {
+                GS_Tri = new GeometryShader(Renderer.viewport.Device, b);
+            }
+
+            //InputLayout
+            Inpl = new InputLayout(Renderer.viewport.Device, Sig, inplElems);
+
+            //Rasterizer state
+            var wireFrameDesc = new RasterizerStateDescription
+            {
+                FillMode = FillMode.Solid,
+                CullMode = CullMode.None,
+                IsFrontCounterclockwise = false,
+                IsDepthClipEnabled = true
+            };
+            RS = RasterizerState.FromDescription(Renderer.viewport.Device, wireFrameDesc);
+        }
+        public void Use()
+        {
+            Renderer.viewport.Device.ImmediateContext.Rasterizer.State = RS;
+            Renderer.viewport.Device.ImmediateContext.VertexShader.Set(VS);
+            Renderer.viewport.Device.ImmediateContext.PixelShader.Set(PS);
+            Renderer.viewport.Device.ImmediateContext.InputAssembler.InputLayout = Inpl;
+            Renderer.viewport.Device.ImmediateContext.GeometryShader.Set(GS_Tri);
         }
     }
 }

@@ -84,6 +84,7 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Editor\3dCursor.cs" />
     <Compile Include="Editor\Tools\Terraformer\Terraformer.cs" />
     <Compile Include="Editor\Tools\Tool.cs" />
     <Compile Include="Editor\World.cs" />

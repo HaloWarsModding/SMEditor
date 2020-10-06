@@ -20,7 +20,8 @@ namespace SMEditor.Editor.Tools
 
             Ray3d ray = new Ray3d(pos, dir);
             int hitId = World.terrain.dMeshAABB.FindNearestHitTriangle(ray);
-                
+            if(hitId != -1) Console.WriteLine(hitId);
+            
         }
     }
 }
