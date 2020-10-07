@@ -140,7 +140,7 @@ namespace SMEditor.Editor
         }
         public void UpdateProjMatrix()
         {
-            cbData.projMatrix = Matrix.PerspectiveFovLH(70F, (float)Renderer.viewport.Width / (float)Renderer.viewport.Height, 0.01F, 100000F);
+            cbData.projMatrix = Matrix.PerspectiveFovLH(70F, (float)Renderer.viewport.Width / (float)Renderer.viewport.Height, 0.01F, 1000F);
             UpdateCameraBuffer();
         }
         public void UpdateViewMatrix()

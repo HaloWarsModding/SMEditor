@@ -29,11 +29,12 @@ namespace SMEditor
             Input.Init();
             ToolDock.Init();
 
-            renderTimer.Interval = 20; //ms
+            renderTimer.Interval = 10; //ms
             renderTimer.Tick += new EventHandler(timer_Tick);
             renderTimer.Start();
             
             World.terrain = new Terrain(256);
+            World.cursor = new _3dCursor();
 
             loaded = true;
         }
@@ -52,6 +53,7 @@ namespace SMEditor
             {
                 u.Update();
             }
+            World.cursor.UpdatePosition();
             Renderer.Draw();
         }
     }

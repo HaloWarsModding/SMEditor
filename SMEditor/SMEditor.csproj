@@ -104,6 +104,7 @@
     <Compile Include="Editor\Renderer.cs" />
     <Compile Include="Editor\Transform.cs" />
     <Compile Include="Scenario\HWDE\HWDEScenario.cs" />
+    <Compile Include="Util.cs" />
     <EmbeddedResource Include="MainWindow\MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </EmbeddedResource>
@@ -131,9 +132,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Shaders\packFloat4ToInt.sh" />
-    <Content Include="Resources\Shaders\boldVertShader.fx" />
-    <Content Include="Resources\Shaders\gridShader.fx" />
+    <Content Include="Resources\Shaders\cursorShader.fx" />
     <Content Include="Resources\Shaders\terrainShader.fx" />
   </ItemGroup>
   <ItemGroup />

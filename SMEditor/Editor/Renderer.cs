@@ -27,14 +27,15 @@ namespace SMEditor
                 new InputElement("POSITION_IN", 0, Format.R32G32B32_Float, 0),
                 new InputElement("COLOR_IN", 0, Format.R32G32B32_Float, 12, 0)
             }));
-
-            //InitTerrain();
-            //InitGrid();
-            //InitboldVert();
+            passes.Add("cursor", new RenderPass("cursor", new[]
+            {
+                new InputElement("POSITION_IN", 0, Format.R32G32B32_Float, 0),
+                new InputElement("COLOR_IN", 0, Format.R32G32B32_Float, 12, 0)
+            }));
         }
 
         public static Dictionary<string, RenderPass> passes = new Dictionary<string, RenderPass>();
-        
+        public static List<TerrainMesh> terrainMeshes = new List<TerrainMesh>();
         
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Draw functions -- called in interval set in MainWindow.cs.
@@ -50,14 +51,15 @@ namespace SMEditor
             passes["terrain"].Use();
             foreach (TerrainMesh m in terrainMeshes) m.Draw();
 
+            World.cursor.Draw();
+
             viewport.Present();
         }
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         
     }
-
-
+    
 
     [StructLayout(LayoutKind.Sequential)]
     public struct BasicVertex
@@ -243,8 +245,7 @@ namespace SMEditor
             ib = new Buffer(Renderer.viewport.Device, istream, ibd);
 
             indexCount = indices.Count;
-
-            Renderer.gridMeshes.Add(this);
+            
 
         }
         public void Draw()
@@ -255,18 +256,18 @@ namespace SMEditor
         }
     }
 
+
+
     class RenderPass
     {
-        public static List<BasicMesh> Meshes = new List<BasicMesh>();
-        public static RasterizerState RS;
+        public RasterizerState RS;
         static ShaderSignature Sig;
-        public static VertexShader VS;
-        public static PixelShader PS;
-        public static GeometryShader GS_Tri;
-        public static GeometryShader GS_Vert;
-        public static InputLayout Inpl;
+        public VertexShader VS;
+        public PixelShader PS;
+        public GeometryShader GS_Tri;
+        public InputLayout Inpl;
         public RenderPass(string name, InputElement[] inplElems) { Init(name, inplElems); }
-        private static void Init(string name, InputElement[] inplElems)
+        private void Init(string name, InputElement[] inplElems)
         {
             //Shaders
             using (var b = ShaderBytecode.CompileFromFile("Shaders\\" + name + "Shader.fx", "vs", "vs_4_0", ShaderFlags.None, EffectFlags.None))
@@ -301,8 +302,8 @@ namespace SMEditor
             Renderer.viewport.Device.ImmediateContext.Rasterizer.State = RS;
             Renderer.viewport.Device.ImmediateContext.VertexShader.Set(VS);
             Renderer.viewport.Device.ImmediateContext.PixelShader.Set(PS);
-            Renderer.viewport.Device.ImmediateContext.InputAssembler.InputLayout = Inpl;
             Renderer.viewport.Device.ImmediateContext.GeometryShader.Set(GS_Tri);
+            Renderer.viewport.Device.ImmediateContext.InputAssembler.InputLayout = Inpl;
         }
     }
 }

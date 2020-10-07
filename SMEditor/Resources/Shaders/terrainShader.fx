@@ -32,7 +32,7 @@ void gs(triangle gsps_input input[3] : SV_POSITION, inout TriangleStream<gsps_in
 	for (int i = 0; i < 3; i++)
 	{
 		output.pos = input[i].pos;
-		output.color = float4(1, 1, 0, 1);
+		output.color = float4(100/255.0F, 149/255.0F, 237/255.0F, 1);
 		tris.Append(output);
 	}
 	tris.RestartStrip();

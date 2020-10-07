@@ -11,6 +11,7 @@ namespace SMEditor.Editor
     public static class World
     {
         public static Terrain terrain;
+        public static _3dCursor cursor;
 
         public static bool CastRay(Vector2 start, Vector3 dir)
         {
