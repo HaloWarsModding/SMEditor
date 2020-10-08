@@ -32,7 +32,8 @@ namespace SMEditor.Editor
         public static bool RMBPressed = false;
         public static bool MMBPressed = false;
         public static Vector3 mouseDeltaPos = Vector3.Zero;
-        public static Vector2 mouseAbsPos = new Vector2();
+        public static Vector2 mouseAbsPosNormalized = new Vector2();
+        public static Vector2 mouseAbsPosScreen = new Vector2();
 
         public static void Poll()
         {
@@ -49,8 +50,11 @@ namespace SMEditor.Editor
             MMBPressed = mState.GetButtons()[2];
             mouseDeltaPos = new Vector3(mState.X, mState.Y, mState.Z);
             
-            mouseAbsPos.X = (Renderer.viewport.PointToClient(SlimDX.Windows.RenderForm.MousePosition).X - (Renderer.viewport.Width / 2F)) / (float)Renderer.viewport.Width;
-            mouseAbsPos.Y = -(Renderer.viewport.PointToClient(SlimDX.Windows.RenderForm.MousePosition).Y - (Renderer.viewport.Height / 2F)) / (float)Renderer.viewport.Height;
+            mouseAbsPosNormalized.X = (Renderer.viewport.PointToClient(System.Windows.Forms.Control.MousePosition).X - (Renderer.viewport.Width / 2F)) / (float)Renderer.viewport.Width;
+            mouseAbsPosNormalized.Y = (Renderer.viewport.PointToClient(System.Windows.Forms.Control.MousePosition).Y - (Renderer.viewport.Height / 2F)) / (float)Renderer.viewport.Height;
+
+            mouseAbsPosScreen.X = Renderer.viewport.PointToClient(System.Windows.Forms.Control.MousePosition).X;
+            mouseAbsPosScreen.Y = Renderer.viewport.PointToClient(System.Windows.Forms.Control.MousePosition).Y;
         }
         public static bool KeyIsDown(Key k)
         {

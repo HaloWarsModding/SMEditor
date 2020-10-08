@@ -29,7 +29,7 @@ namespace SMEditor
             Input.Init();
             ToolDock.Init();
 
-            renderTimer.Interval = 10; //ms
+            renderTimer.Interval = 1; //ms
             renderTimer.Tick += new EventHandler(timer_Tick);
             renderTimer.Start();
             
@@ -49,11 +49,8 @@ namespace SMEditor
         private void timer_Tick(object sender, EventArgs e)
         {
             Input.Poll();
-            foreach(IUpdateable u in updateables)
-            {
-                u.Update();
-            }
-            World.cursor.UpdatePosition();
+            foreach(IUpdateable u in updateables) u.Update();
+            World.Update();
             Renderer.Draw();
         }
     }

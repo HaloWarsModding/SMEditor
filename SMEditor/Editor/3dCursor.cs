@@ -84,42 +84,22 @@ new BasicVertex(new Vector3(0.319846F, 5.531382F, 0.073004F), new Vector3(0, 0, 
 9, 21, 20,
             });
         }
-        public void UpdatePosition()
+        public void UpdatePositionOnTerrain()
         {
-            //Matrix mvp = Camera.cbData.viewMatrix;
-            //Vector3 orig = new Vector3(Input.mouseAbsPos, 0f);
-            //Vector3 origFar = new Vector3(Input.mouseAbsPos, 0f);
-            ////This gets mouse position on near plane
-            //Vector3d pos = Convert.FromV3(Vector3.TransformCoordinate(orig, Matrix.Invert(mvp)));
-            //Vector3d far = Convert.FromV3(Vector3.TransformCoordinate(origFar, Matrix.Invert(mvp)));
-
-            //Vector3 dirSDX = Vector3.Normalize(Renderer.mainCamera.t.position - Renderer.mainCamera.cameraTarget);
-            //Vector3d dir = new Vector3d(-dirSDX.X, -dirSDX.Y, -dirSDX.Z);
-
-            ////Console.WriteLine(pos);
-            //Console.WriteLine(pos);
-            //Console.WriteLine(dir);
-            //Console.WriteLine();
-
-            var vx = (2 * Input.mouseAbsPos.X) / Camera.cbData.projMatrix.M11;
-            var vy = (2 * Input.mouseAbsPos.Y) / Camera.cbData.projMatrix.M22;
+            var vx = (2 * Input.mouseAbsPosNormalized.X) / Camera.cbData.projMatrix.M11;
+            var vy = (-2 * Input.mouseAbsPosNormalized.Y) / Camera.cbData.projMatrix.M22;
 
             var wInv = Matrix.Invert(Camera.cbData.viewMatrix);
             Vector3d pos = Convert.ToV3d(Vector3.TransformCoordinate(new Vector3(0, 0, 0), wInv));
             Vector3d dir = Convert.ToV3d(Vector3.TransformNormal(new Vector3(vx, vy, 1.0F), wInv));
-
-            Console.WriteLine(pos);
-            Console.WriteLine(dir);
-            Console.WriteLine();
 
             Ray3d ray = new Ray3d(pos, dir);
             int hitId = World.terrain.dMeshAABB.FindNearestHitTriangle(ray);
             if (hitId != -1)
             {
                 IntrRay3Triangle3 hit = MeshQueries.TriangleIntersection(World.terrain.dMesh, hitId, ray);
-                Vector3d v = pos + (dir * pos.Distance(ray.PointAt(hit.RayParameter)));
-                World.cursor.t.position = Convert.ToV3(v);
-                Console.WriteLine(pos.Distance(ray.PointAt(hit.RayParameter)));
+                Vector3d v = hit.Ray.PointAt(hit.RayParameter);
+                t.position = Convert.ToV3(v);
             }
         }
         public void Draw()

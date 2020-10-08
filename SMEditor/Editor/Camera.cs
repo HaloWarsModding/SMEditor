@@ -48,7 +48,7 @@ namespace SMEditor.Editor
         /// Move fucntions.
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         public Vector3 cameraTarget = new Vector3(0,0,0);
-        float cameraRadius = 0f;
+        public float cameraRadius = 0f;
         public void Rotate(float yaw, float pitch)
         {
             pitch = -pitch;

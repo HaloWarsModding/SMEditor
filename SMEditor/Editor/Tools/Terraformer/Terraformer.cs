@@ -12,10 +12,7 @@ namespace SMEditor.Editor.Tools
     {
         public override void PerformFunction()
         {
-            //World.CastRay(new Vector2(0, 0), Vector3.Normalize((Renderer.mainCamera.t.position - Renderer.mainCamera.cameraTarget)));
-
-
-            
+            Console.WriteLine("A");
         }
     }
 }
