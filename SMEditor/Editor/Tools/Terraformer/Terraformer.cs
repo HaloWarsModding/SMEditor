@@ -12,7 +12,17 @@ namespace SMEditor.Editor.Tools
     {
         public override void PerformFunction()
         {
-            Console.WriteLine("A");
+            if (World.cursor.hitInfoExists)
+            {
+                Vector3d v1 = World.terrain.dMesh.GetVertex(World.terrain.dMesh.GetTriangle(World.cursor.currHitTri).a);
+                Vector3d v2 = World.terrain.dMesh.GetVertex(World.terrain.dMesh.GetTriangle(World.cursor.currHitTri).b);
+                Vector3d v3 = World.terrain.dMesh.GetVertex(World.terrain.dMesh.GetTriangle(World.cursor.currHitTri).c);
+
+                World.terrain.dMesh.SetVertex(World.terrain.dMesh.GetTriangle(World.cursor.currHitTri).c, v3 + new Vector3d(0, 0.1F, 0));
+
+                World.terrain.dMeshAABB.Build();
+                World.terrain.UpdateVisual();
+            }
         }
     }
 }

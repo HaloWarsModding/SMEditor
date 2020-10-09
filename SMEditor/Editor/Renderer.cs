@@ -22,12 +22,12 @@ namespace SMEditor
             viewport = Program.mainWindow.d3D11Control;
             mainCamera = new Camera();
 
-            passes.Add("terrain", new RenderPass("terrain", new[]
+            passes.Add("terrain", new RenderPass("terrain", FillMode.Wireframe, new[]
             {
                 new InputElement("POSITION_IN", 0, Format.R32G32B32_Float, 0),
                 new InputElement("COLOR_IN", 0, Format.R32G32B32_Float, 12, 0)
             }));
-            passes.Add("cursor", new RenderPass("cursor", new[]
+            passes.Add("cursor", new RenderPass("cursor", FillMode.Solid, new[]
             {
                 new InputElement("POSITION_IN", 0, Format.R32G32B32_Float, 0),
                 new InputElement("COLOR_IN", 0, Format.R32G32B32_Float, 12, 0)
@@ -88,13 +88,13 @@ namespace SMEditor
             DataStream vd = new DataStream(vertices.ToArray(), true, true); vd.Position = 0;
             DataStream id = new DataStream(indices.ToArray(), true, true); id.Position = 0;
 
-            vbd = new BufferDescription(
-            Marshal.SizeOf(new BasicVertex()) * vertices.Count,
-            ResourceUsage.Dynamic,
-            BindFlags.VertexBuffer,
-            CpuAccessFlags.Write,
-            ResourceOptionFlags.None, 0);
-            vb = new Buffer(Renderer.viewport.Device, vbd);
+            vbd = new BufferDescription
+            {
+                Usage = ResourceUsage.Default,
+                SizeInBytes = Marshal.SizeOf(new BasicVertex()) * vertices.Count,
+                BindFlags = BindFlags.VertexBuffer
+            };
+            vb = new Buffer(Renderer.viewport.Device, vd, vbd);
             vbind = new VertexBufferBinding(vb, Marshal.SizeOf(new BasicVertex()), 0);
 
             //indices
@@ -118,15 +118,18 @@ namespace SMEditor
         }
         public virtual void UpdateData(List<BasicVertex> vertices, List<int> indices)
         {
+            
+
             DataStream vd = new DataStream(vertices.ToArray(), true, true); vd.Position = 0;
             //DataStream id = new DataStream(indices.ToArray(), true, true); id.Position = 0;
-            
+
             //ib = new Buffer(Renderer.viewport.Device, id, ibd);
-            vb = new Buffer(Renderer.viewport.Device, vd, vbd);
-            vbind = new VertexBufferBinding(vb, Marshal.SizeOf(new BasicVertex()), 0);
+            //vb = new Buffer(Renderer.viewport.Device, vd, vbd);
+            //vbind = new VertexBufferBinding(vb, Marshal.SizeOf(new BasicVertex()), 0);
+
 
             //Renderer.viewport.Context.MapSubresource(vb, MapMode.WriteDiscard, SlimDX.Direct3D11.MapFlags.None);
-            //Renderer.viewport.Context.UpdateSubresource(new DataBox((int)vd.Length, (int)vd.Length, vd), vb, 0);
+            Renderer.viewport.Context.UpdateSubresource(new DataBox(0, 0, vd), vb, 0);
             //Renderer.viewport.Context.UnmapSubresource(vb, 0);
 
             //Renderer.viewport.Context.MapSubresource(ib, MapMode.WriteDiscard, SlimDX.Direct3D11.MapFlags.None);
@@ -256,8 +259,7 @@ namespace SMEditor
         }
     }
 
-
-
+    
     class RenderPass
     {
         public RasterizerState RS;
@@ -266,8 +268,8 @@ namespace SMEditor
         public PixelShader PS;
         public GeometryShader GS_Tri;
         public InputLayout Inpl;
-        public RenderPass(string name, InputElement[] inplElems) { Init(name, inplElems); }
-        private void Init(string name, InputElement[] inplElems)
+        public RenderPass(string name, FillMode fillMode, InputElement[] inplElems) { Init(name, inplElems, fillMode); }
+        private void Init(string name, InputElement[] inplElems, FillMode fillMode)
         {
             //Shaders
             using (var b = ShaderBytecode.CompileFromFile("Shaders\\" + name + "Shader.fx", "vs", "vs_4_0", ShaderFlags.None, EffectFlags.None))
@@ -290,7 +292,7 @@ namespace SMEditor
             //Rasterizer state
             var wireFrameDesc = new RasterizerStateDescription
             {
-                FillMode = FillMode.Solid,
+                FillMode = fillMode,
                 CullMode = CullMode.None,
                 IsFrontCounterclockwise = false,
                 IsDepthClipEnabled = true

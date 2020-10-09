@@ -12,6 +12,8 @@ namespace SMEditor.Editor
     {
         BasicMesh cursor;
         public Transform t = new Transform();
+        public IntrRay3Triangle3 hitInfo;
+        public bool hitInfoExists;
 
         public _3dCursor()
         {
@@ -84,8 +86,11 @@ new BasicVertex(new Vector3(0.319846F, 5.531382F, 0.073004F), new Vector3(0, 0, 
 9, 21, 20,
             });
         }
+        public int currHitTri;
         public void UpdatePositionOnTerrain()
         {
+            hitInfoExists = false;
+
             var vx = (2 * Input.mouseAbsPosNormalized.X) / Camera.cbData.projMatrix.M11;
             var vy = (-2 * Input.mouseAbsPosNormalized.Y) / Camera.cbData.projMatrix.M22;
 
@@ -94,12 +99,15 @@ new BasicVertex(new Vector3(0.319846F, 5.531382F, 0.073004F), new Vector3(0, 0, 
             Vector3d dir = Convert.ToV3d(Vector3.TransformNormal(new Vector3(vx, vy, 1.0F), wInv));
 
             Ray3d ray = new Ray3d(pos, dir);
-            int hitId = World.terrain.dMeshAABB.FindNearestHitTriangle(ray);
-            if (hitId != -1)
+            currHitTri = World.terrain.dMeshAABB.FindNearestHitTriangle(ray);
+
+            if (currHitTri != -1)
             {
-                IntrRay3Triangle3 hit = MeshQueries.TriangleIntersection(World.terrain.dMesh, hitId, ray);
-                Vector3d v = hit.Ray.PointAt(hit.RayParameter);
+                hitInfo = MeshQueries.TriangleIntersection(World.terrain.dMesh, currHitTri, ray);
+                Vector3d v = hitInfo.Ray.PointAt(hitInfo.RayParameter);
                 t.position = Convert.ToV3(v);
+
+                hitInfoExists = true;
             }
         }
         public void Draw()

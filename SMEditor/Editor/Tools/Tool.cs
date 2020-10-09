@@ -19,7 +19,7 @@ namespace SMEditor.Editor.Tools
             tools["Terraformer"].enabled = true;
         }
 
-        public static void Update()
+        public static void UpdateAll()
         {
             foreach (Tool t in tools.Values) t.Update();
         }

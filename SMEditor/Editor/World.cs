@@ -50,7 +50,7 @@ namespace SMEditor.Editor
                 if (!loopCursorInBounds) mouseInBounds = false;
             }
 
-            ToolDock.Update();
+            ToolDock.UpdateAll();
         }
     }
 }
