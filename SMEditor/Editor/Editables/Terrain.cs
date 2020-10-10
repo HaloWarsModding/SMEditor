@@ -72,12 +72,16 @@ namespace SMEditor.Editor
             Renderer.terrainMeshes.Add(visualMesh);
         }
         
-        public void SetVertexPosition(int vID, Vector3d newPos)
+        public enum EditMode { Add, Set }
+        public void EditVertexHeight(int vID, float height, EditMode mode)
         {
-            vertices[vID] = new BasicVertex(vertices[vID].position + Convert.ToV3(newPos), vertices[vID].color);
+            Vector3 v = vertices[vID].position;
+            if (mode == EditMode.Add) v.Y += height;
+            if (mode == EditMode.Set) v.Y = height;
+
+            vertices[vID] = new BasicVertex(v, vertices[vID].color);
             vertexNeedsUpdate[vID] = true;
         }
-
 
         public void UpdateCollisionModel()
         {
@@ -100,9 +104,9 @@ namespace SMEditor.Editor
         {
             List<int> verts = new List<int>();
 
-            int halfRad = (int)Math.Round(rad / 2F);
-            Console.WriteLine(halfRad);
+            int halfRad = (int)Math.Round(rad / 2F) + 1;
 
+            //get all verts in radius
             for (int x = 0; x < halfRad * 2; x++) 
             {
                 for (int y = 0; y < halfRad * 2; y++)
@@ -115,7 +119,18 @@ namespace SMEditor.Editor
                 }
             }
 
-            return verts.Distinct().ToList();
+            List<int> finalVerts = new List<int>();
+            //clean verts for any out-of-bounds entries, or verts that are outside the radius.
+            foreach(int i in verts)
+            {
+                if(i >= 0 && i <= size*size && Vector3.Distance(vertices[i].position, vertices[vID].position) < rad)
+                {
+                    finalVerts.Add(i);
+                }
+            }
+
+            //use Distinct() to remove duplicates, just in case.
+            return finalVerts.Distinct().ToList();
         }
     }
 }

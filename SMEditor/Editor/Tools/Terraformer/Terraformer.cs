@@ -22,7 +22,7 @@ namespace SMEditor.Editor.Tools
                 {
                     foreach(int i in World.terrain.GetVertsInRadius(World.terrain.dMesh.GetTriangle(World.cursor.currHitTri).a, 12))
                     {
-                        World.terrain.SetVertexPosition(i, new Vector3d(0, 0.1F, 0));
+                        World.terrain.EditVertexHeight(i, .10F, Terrain.EditMode.Add);
                     }
 
                     World.terrain.UpdateVisual();
