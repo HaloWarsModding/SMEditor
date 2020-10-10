@@ -91,11 +91,11 @@ namespace SMEditor
             vbd = new BufferDescription
             {
                 Usage = ResourceUsage.Default,
-                SizeInBytes = Marshal.SizeOf(new BasicVertex()) * vertices.Count,
+                SizeInBytes = Marshal.SizeOf(typeof(BasicVertex)) * vertices.Count,
                 BindFlags = BindFlags.VertexBuffer
             };
             vb = new Buffer(Renderer.viewport.Device, vd, vbd);
-            vbind = new VertexBufferBinding(vb, Marshal.SizeOf(new BasicVertex()), 0);
+            vbind = new VertexBufferBinding(vb, Marshal.SizeOf(typeof(BasicVertex)), 0);
 
             //indices
             ibd = new BufferDescription(
@@ -108,7 +108,7 @@ namespace SMEditor
 
             indexCount = indices.Count;
 
-            UpdateData(vertices, indices);
+            UpdateVertexData(vertices);
         }
         public virtual void Draw()
         {
@@ -116,25 +116,11 @@ namespace SMEditor
             Renderer.viewport.Device.ImmediateContext.InputAssembler.SetIndexBuffer(ib, Format.R32_SInt, 0);
             Renderer.viewport.Device.ImmediateContext.DrawIndexed(indexCount, 0, 0);
         }
-        public virtual void UpdateData(List<BasicVertex> vertices, List<int> indices)
+        public virtual void UpdateVertexData(List<BasicVertex> vertices)
         {
-            
-
             DataStream vd = new DataStream(vertices.ToArray(), true, true); vd.Position = 0;
-            //DataStream id = new DataStream(indices.ToArray(), true, true); id.Position = 0;
-
-            //ib = new Buffer(Renderer.viewport.Device, id, ibd);
-            //vb = new Buffer(Renderer.viewport.Device, vd, vbd);
-            //vbind = new VertexBufferBinding(vb, Marshal.SizeOf(new BasicVertex()), 0);
-
-
-            //Renderer.viewport.Context.MapSubresource(vb, MapMode.WriteDiscard, SlimDX.Direct3D11.MapFlags.None);
             Renderer.viewport.Context.UpdateSubresource(new DataBox(0, 0, vd), vb, 0);
-            //Renderer.viewport.Context.UnmapSubresource(vb, 0);
-
-            //Renderer.viewport.Context.MapSubresource(ib, MapMode.WriteDiscard, SlimDX.Direct3D11.MapFlags.None);
-            //Renderer.viewport.Context.UpdateSubresource(new DataBox(0, 0, id), ib, 0);
-            //Renderer.viewport.Context.UnmapSubresource(ib, 0);
+            vd.Dispose();
         }
     }
 
@@ -153,9 +139,9 @@ namespace SMEditor
                 Quaternion.Identity, new Vector3(1, 1, 1), new Vector3(0, 0, 0), Quaternion.Identity, new Vector3(0, 0, 0)));
             base.Draw();
         }
-        public override void UpdateData(List<BasicVertex> vertices, List<int> indices)
+        public override void UpdateVertexData(List<BasicVertex> vertices)
         {
-            base.UpdateData(vertices, indices);
+            base.UpdateVertexData(vertices);
         }
     }
 

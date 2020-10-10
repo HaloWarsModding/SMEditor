@@ -10,18 +10,31 @@ namespace SMEditor.Editor.Tools
 {
     public class Terraformer : Tool
     {
+        bool released = false;
+        bool collisionMeshUpdateNeeded = false;
         public override void PerformFunction()
         {
-            if (World.cursor.hitInfoExists)
+            released = true;
+            if (Input.LMBPressed)
             {
-                Vector3d v1 = World.terrain.dMesh.GetVertex(World.terrain.dMesh.GetTriangle(World.cursor.currHitTri).a);
-                Vector3d v2 = World.terrain.dMesh.GetVertex(World.terrain.dMesh.GetTriangle(World.cursor.currHitTri).b);
-                Vector3d v3 = World.terrain.dMesh.GetVertex(World.terrain.dMesh.GetTriangle(World.cursor.currHitTri).c);
+                released = false;
+                if (World.cursor.hitInfoExists)
+                {
+                    Console.WriteLine(World.terrain.dMesh.GetTriangle(World.cursor.currHitTri).a);
+                    //World.terrain.dMesh.SetVertex(World.terrain.dMesh.GetTriangle(World.cursor.currHitTri).c, v3 + new Vector3d(0, 0.1F, 0));
 
-                World.terrain.dMesh.SetVertex(World.terrain.dMesh.GetTriangle(World.cursor.currHitTri).c, v3 + new Vector3d(0, 0.1F, 0));
+                    World.terrain.SetVertexPosition(World.terrain.dMesh.GetTriangle(World.cursor.currHitTri).a, Convert.ToV3d((World.terrain.vertices[World.terrain.dMesh.GetTriangle(World.cursor.currHitTri).a].position + new Vector3(0, 0.1F, 0))));
 
-                World.terrain.dMeshAABB.Build();
-                World.terrain.UpdateVisual();
+                    //World.terrain.dMeshAABB.Build();
+                    World.terrain.UpdateVisual();
+
+                    collisionMeshUpdateNeeded = true;
+                }
+            }
+            if(released && collisionMeshUpdateNeeded)
+            {
+                collisionMeshUpdateNeeded = false;
+                World.terrain.UpdateCollisionModel();
             }
         }
     }

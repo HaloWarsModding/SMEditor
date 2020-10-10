@@ -29,7 +29,7 @@ namespace SMEditor
             Input.Init();
             ToolDock.Init();
 
-            renderTimer.Interval = 1; //ms
+            renderTimer.Interval = 20; //ms
             renderTimer.Tick += new EventHandler(timer_Tick);
             renderTimer.Start();
             

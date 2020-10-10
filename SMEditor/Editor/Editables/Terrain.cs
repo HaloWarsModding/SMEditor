@@ -13,15 +13,18 @@ namespace SMEditor.Editor
 {
     public class Terrain
     {
-        //data
+
         int size;
 
-        //world
         public DMesh3 dMesh;
         public DMeshAABBTree3 dMeshAABB;
 
-        //visual
         TerrainMesh visualMesh;
+
+        public List<BasicVertex> vertices;
+        public List<int> inds = new List<int>();
+        public List<bool> vertexNeedsUpdate;
+
 
         public Terrain(int _size)
         {
@@ -29,13 +32,16 @@ namespace SMEditor.Editor
 
             dMesh = new DMesh3(MeshComponents.VertexColors);
 
+            vertices = new List<BasicVertex>();
+            vertexNeedsUpdate = new List<bool>();
             for (int i = 0; i <= size ; i++)
             {
                 for (int j = 0; j <= size ; j++)
                 {
                     Vector3d v = new Vector3d((float)i, 0, (float)j);
-
-                    dMesh.AppendVertex(new NewVertexInfo(v, new Vector3f(0,0,1)));
+                    vertices.Add(new BasicVertex(Convert.ToV3(v), new Vector3(0, 0, 0)));
+                    dMesh.AppendVertex(new NewVertexInfo(v, new Vector3f(0, 0, 0)));
+                    vertexNeedsUpdate.Add(false);
                 }
             }
             for (int i = 0; i < size; i++) {
@@ -46,6 +52,14 @@ namespace SMEditor.Editor
                     dMesh.AppendTriangle(row1 + i, row1 + i + 1, row2 + i + 1);
                     //tri 2
                     dMesh.AppendTriangle(row1 + i, row2 + i + 1, row2 + i);
+
+                    inds.Add(row1 + i);
+                    inds.Add(row1 + i + 1);
+                    inds.Add(row2 + i + 1);
+
+                    inds.Add(row1 + i);
+                    inds.Add(row2 + i + 1);
+                    inds.Add(row2 + i);
                 }
             }
             
@@ -53,75 +67,32 @@ namespace SMEditor.Editor
             dMeshAABB.Build();
             Console.WriteLine(dMeshAABB.Bounds.Min + " | " + dMeshAABB.Bounds.Max);
 
-            InitVisual();
-
-            //UpdateVisual();
+            visualMesh = new TerrainMesh();
+            visualMesh.Init(vertices, inds);
+            Renderer.terrainMeshes.Add(visualMesh);
         }
         
-        public void InitVisual()
+        public void SetVertexPosition(int vID, Vector3d newPos)
         {
-            List<BasicVertex> bvs = new List<BasicVertex>();
-            List<int> inds = new List<int>();
-
-            for (int i = 0; i < dMesh.MaxVertexID; i++)
-            {
-                Vector3d pd = dMesh.GetVertex(i);
-                Vector3 p = new Vector3((float)pd.x, (float)pd.y, (float)pd.z);
-                Vector3d cd = dMesh.GetVertexColor(i);
-                Vector3 c = new Vector3((float)cd.x, (float)cd.y, (float)cd.z);
-                BasicVertex bv = new BasicVertex(p, c);
-                bvs.Add(bv);
-            }
-            
-
-            int triCnt = dMesh.Triangles().Count();
-            List<Index3i> i3s = dMesh.Triangles().ToList();
-
-            for (int i = 0; i < triCnt; i++)
-            {
-                inds.Add(i3s[i].a);
-                inds.Add(i3s[i].b);
-                inds.Add(i3s[i].c);
-            }
-
-            Console.WriteLine(dMesh.Triangles().Count());
-
-            visualMesh = new TerrainMesh();
-            visualMesh.Init(bvs, inds);
-            Renderer.terrainMeshes.Add(visualMesh);
-
+            vertices[vID] = new BasicVertex(Convert.ToV3(newPos), vertices[vID].color);
+            vertexNeedsUpdate[vID] = true;
         }
 
+        public void UpdateCollisionModel()
+        {
+            for(int i = 0; i < vertices.Count; i++)
+            {
+                if(vertexNeedsUpdate[i])
+                {
+                    dMesh.SetVertex(i, Convert.ToV3d(vertices[i].position));
+                    vertexNeedsUpdate[i] = false;
+                }
+            }
+            dMeshAABB.Build();
+        }
         public void UpdateVisual()
         {
-            List<BasicVertex> bvs = new List<BasicVertex>();
-            List<int> inds = new List<int>();
-
-            for (int i = 0; i < dMesh.MaxVertexID; i++)
-            {
-                Vector3d pd = dMesh.GetVertex(i);
-                Vector3 p = new Vector3((float)pd.x, (float)pd.y, (float)pd.z);
-                Vector3d cd = dMesh.GetVertexColor(i);
-                Vector3 c = new Vector3((float)cd.x, (float)cd.y, (float)cd.z);
-                BasicVertex bv = new BasicVertex(p, c);
-                bvs.Add(bv);
-            }
-
-
-            int triCnt = dMesh.Triangles().Count();
-            List<Index3i> i3s = dMesh.Triangles().ToList();
-
-            for (int i = 0; i < triCnt; i++)
-            {
-                inds.Add(i3s[i].a);
-                inds.Add(i3s[i].b);
-                inds.Add(i3s[i].c);
-            }
-
-            Console.WriteLine(dMesh.Triangles().Count());
-
-            visualMesh.UpdateData(bvs, inds);
-
+            visualMesh.UpdateVertexData(vertices);
         }
     }
 }
