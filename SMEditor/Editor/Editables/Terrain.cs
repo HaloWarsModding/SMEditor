@@ -14,7 +14,7 @@ namespace SMEditor.Editor
     public class Terrain
     {
 
-        int size;
+        public int size;
 
         public DMesh3 dMesh;
         public DMeshAABBTree3 dMeshAABB;
@@ -74,9 +74,10 @@ namespace SMEditor.Editor
         
         public void SetVertexPosition(int vID, Vector3d newPos)
         {
-            vertices[vID] = new BasicVertex(Convert.ToV3(newPos), vertices[vID].color);
+            vertices[vID] = new BasicVertex(vertices[vID].position + Convert.ToV3(newPos), vertices[vID].color);
             vertexNeedsUpdate[vID] = true;
         }
+
 
         public void UpdateCollisionModel()
         {
@@ -93,6 +94,28 @@ namespace SMEditor.Editor
         public void UpdateVisual()
         {
             visualMesh.UpdateVertexData(vertices);
+        }
+
+        public List<int> GetVertsInRadius(int vID, double rad)
+        {
+            List<int> verts = new List<int>();
+
+            int halfRad = (int)Math.Round(rad / 2F);
+            Console.WriteLine(halfRad);
+
+            for (int x = 0; x < halfRad * 2; x++) 
+            {
+                for (int y = 0; y < halfRad * 2; y++)
+                {
+                    verts.Add(vID + x + ((size + 1) * y));
+                    verts.Add(vID - x + ((size + 1) * y));
+
+                    verts.Add(vID + x + ((size + 1) * -y));
+                    verts.Add(vID - x + ((size + 1) * -y));
+                }
+            }
+
+            return verts.Distinct().ToList();
         }
     }
 }

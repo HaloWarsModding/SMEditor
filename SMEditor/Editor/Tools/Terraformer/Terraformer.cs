@@ -20,14 +20,12 @@ namespace SMEditor.Editor.Tools
                 released = false;
                 if (World.cursor.hitInfoExists)
                 {
-                    Console.WriteLine(World.terrain.dMesh.GetTriangle(World.cursor.currHitTri).a);
-                    //World.terrain.dMesh.SetVertex(World.terrain.dMesh.GetTriangle(World.cursor.currHitTri).c, v3 + new Vector3d(0, 0.1F, 0));
+                    foreach(int i in World.terrain.GetVertsInRadius(World.terrain.dMesh.GetTriangle(World.cursor.currHitTri).a, 12))
+                    {
+                        World.terrain.SetVertexPosition(i, new Vector3d(0, 0.1F, 0));
+                    }
 
-                    World.terrain.SetVertexPosition(World.terrain.dMesh.GetTriangle(World.cursor.currHitTri).a, Convert.ToV3d((World.terrain.vertices[World.terrain.dMesh.GetTriangle(World.cursor.currHitTri).a].position + new Vector3(0, 0.1F, 0))));
-
-                    //World.terrain.dMeshAABB.Build();
                     World.terrain.UpdateVisual();
-
                     collisionMeshUpdateNeeded = true;
                 }
             }
