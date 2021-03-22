@@ -14,9 +14,9 @@ using SMEditor.Scenario.HWDE;
 
 namespace SMEditor
 {
-    public partial class MainWindow : Form
+    public partial class MainWindowOld : Form
     {
-        public MainWindow()
+        public MainWindowOld()
         {
             InitializeComponent();
         }
@@ -52,6 +52,21 @@ namespace SMEditor
             foreach(IUpdateable u in updateables) u.Update();
             World.Update();
             Renderer.Draw();
+        }
+
+        private void rangeSlider1_ValueChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void MainWindowOld_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void rangeSlider1_ValueChanged_1(object sender, EventArgs e)
+        {
+
         }
     }
 }

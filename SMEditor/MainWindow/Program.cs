@@ -3,19 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using SMEditor;
 
 namespace SMEditor
 {
     static class Program
     {
-        public static MainWindow mainWindow;
-        
-        [STAThread]
-        static void Main()
+        public static MainWindowOld mainWindow;
+
+        public static void Main(string[] args)
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            mainWindow = new MainWindow();
+            mainWindow = new MainWindowOld();
             Application.Run(mainWindow);
         }
     }

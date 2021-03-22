@@ -119,14 +119,20 @@ namespace SMEditor.Editor
         {
 
             AddRadius(Input.mouseDeltaPos.Z / -10);
-            if(!Input.KeyIsDown(Key.LeftShift) && Input.MMBPressed)
+            //left shift not pressed
+                //mmb pressed
+            if(!Input.KeyIsDown(Key.LeftShift) && Input.MMBPressed) 
             {
                 Rotate(Input.mouseDeltaPos.X / 150F, Input.mouseDeltaPos.Y / 150F);
             }
+
+            //left shift pressed
+                //mmb pressed, alt not pressed
             if (Input.KeyIsDown(Key.LeftShift) && Input.MMBPressed && !Input.KeyIsDown(Key.LeftAlt))
             {
-                MoveRelativeToScreen(-Input.mouseDeltaPos.X * 10F, Input.mouseDeltaPos.Y * 10F);
+                MoveRelativeToScreen(-Input.mouseDeltaPos.X * 5F, Input.mouseDeltaPos.Y * 5F);
             }
+                //mmb pressed, alt pressed
             if (Input.KeyIsDown(Key.LeftShift) && Input.MMBPressed && Input.KeyIsDown(Key.LeftAlt))
             {
                 MoveRelativeToScreen(-Input.mouseDeltaPos.X, Input.mouseDeltaPos.Y);

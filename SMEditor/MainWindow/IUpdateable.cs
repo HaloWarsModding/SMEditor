@@ -10,7 +10,7 @@ namespace SMEditor
     {
         public IUpdateable()
         {
-            MainWindow.updateables.Add(this);
+            MainWindowOld.updateables.Add(this);
         }
         public virtual void Update() { }
     }

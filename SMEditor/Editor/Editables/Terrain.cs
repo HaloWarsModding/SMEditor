@@ -8,40 +8,43 @@ using SMEditor;
 using SlimDX;
 using System.Drawing;
 using g3;
+using System.Threading;
 
 namespace SMEditor.Editor
 {
     public class Terrain
     {
-
         public int size;
 
         public DMesh3 dMesh;
         public DMeshAABBTree3 dMeshAABB;
 
-        TerrainMesh visualMesh;
+        public TerrainMesh visualMesh;
 
         public List<BasicVertex> vertices;
         public List<int> inds = new List<int>();
-        public List<bool> vertexNeedsUpdate;
+        public List<bool> vertexNeedsLightingUpdate;
+        public List<bool> vertexNeedsCollisionUpdate;
 
 
         public Terrain(int _size)
         {
             size = _size;
 
-            dMesh = new DMesh3(MeshComponents.VertexColors);
+            dMesh = new DMesh3(MeshComponents.VertexNormals | MeshComponents.VertexColors);
 
             vertices = new List<BasicVertex>();
-            vertexNeedsUpdate = new List<bool>();
+            vertexNeedsCollisionUpdate = new List<bool>();
+            vertexNeedsLightingUpdate = new List<bool>();
             for (int i = 0; i <= size ; i++)
             {
                 for (int j = 0; j <= size ; j++)
                 {
                     Vector3d v = new Vector3d((float)i, 0, (float)j);
-                    vertices.Add(new BasicVertex(Convert.ToV3(v), new Vector3(0, 0, 0)));
+                    vertices.Add(new BasicVertex(Convert.ToV3(v), new Vector3(0, 0, 0), new Vector3(0, 1, 0)));
                     dMesh.AppendVertex(new NewVertexInfo(v, new Vector3f(0, 0, 0)));
-                    vertexNeedsUpdate.Add(false);
+                    vertexNeedsCollisionUpdate.Add(false);
+                    vertexNeedsLightingUpdate.Add(false);
                 }
             }
             for (int i = 0; i < size; i++) {
@@ -62,14 +65,13 @@ namespace SMEditor.Editor
                     inds.Add(row2 + i);
                 }
             }
-            
+            dMesh.EnableVertexNormals(new Vector3f(0, 1, 0));
+
             dMeshAABB = new DMeshAABBTree3(dMesh);
             dMeshAABB.Build();
-            Console.WriteLine(dMeshAABB.Bounds.Min + " | " + dMeshAABB.Bounds.Max);
 
             visualMesh = new TerrainMesh();
             visualMesh.Init(vertices, inds);
-            Renderer.terrainMeshes.Add(visualMesh);
         }
         
         public enum EditMode { Add, Set }
@@ -78,19 +80,22 @@ namespace SMEditor.Editor
             Vector3 v = vertices[vID].position;
             if (mode == EditMode.Add) v.Y += height;
             if (mode == EditMode.Set) v.Y = height;
+            
+            UpdateNormalFast(vID);
+            vertices[vID] = new BasicVertex(v, vertices[vID].color, vertices[vID].normal);
 
-            vertices[vID] = new BasicVertex(v, vertices[vID].color);
-            vertexNeedsUpdate[vID] = true;
+            vertexNeedsCollisionUpdate[vID] = true;
+            vertexNeedsLightingUpdate[vID] = true;
         }
 
         public void UpdateCollisionModel()
         {
-            for(int i = 0; i < vertices.Count; i++)
+            for (int i = 0; i < vertices.Count; i++)
             {
-                if(vertexNeedsUpdate[i])
+                if(vertexNeedsCollisionUpdate[i])
                 {
                     dMesh.SetVertex(i, Convert.ToV3d(vertices[i].position));
-                    vertexNeedsUpdate[i] = false;
+                    vertexNeedsCollisionUpdate[i] = false;
                 }
             }
             dMeshAABB.Build();
@@ -98,6 +103,42 @@ namespace SMEditor.Editor
         public void UpdateVisual()
         {
             visualMesh.UpdateVertexData(vertices);
+        }
+        public void UpdateLighting()
+        {
+            SMMeshNormals.QuickCompute(dMesh);
+            for(int i = 0; i < vertices.Count; i++)
+            {
+                if (vertexNeedsLightingUpdate[i])
+                {
+                    vertices[i] = new BasicVertex(vertices[i].position, vertices[i].color, Convert.ToV3(dMesh.GetVertexNormal(i)));
+                    vertexNeedsLightingUpdate[i] = false;
+                }
+            }
+        }
+        public void UpdateNormalFast(int vID)
+        {
+            List<int> t = new List<int>();
+            dMesh.GetVtxTriangles(vID, t, false);
+            foreach (int triI in t)
+            {
+                Index3i tri = dMesh.GetTriangle(triI);
+                Vector3d va = Convert.ToV3d(vertices[tri.a].position);
+                Vector3d vb = Convert.ToV3d(vertices[tri.b].position);
+                Vector3d vc = Convert.ToV3d(vertices[tri.c].position);
+                Vector3d N = MathUtil.Normal(ref va, ref vb, ref vc);
+                double a = MathUtil.Area(ref va, ref vb, ref vc);
+                vertices[vID] = new BasicVertex(vertices[vID].position, vertices[vID].color, Convert.ToV3(a * N));
+            }
+        }
+        public void UpdateNormalsFinal()
+        {
+            MeshNormals.QuickCompute(dMesh);
+            for(int i = 0; i < vertices.Count; i++)
+            {
+                vertices[i] = new BasicVertex(vertices[i].position, vertices[i].color, Convert.ToV3(dMesh.GetVertexNormal(i)));
+            }
+            UpdateVisual();
         }
 
         public List<int> GetVertsInRadius(int vID, double rad)

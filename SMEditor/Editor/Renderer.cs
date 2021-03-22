@@ -22,10 +22,11 @@ namespace SMEditor
             viewport = Program.mainWindow.d3D11Control;
             mainCamera = new Camera();
 
-            passes.Add("terrain", new RenderPass("terrain", FillMode.Wireframe, new[]
+            passes.Add("terrain", new RenderPass("terrain", FillMode.Solid, new[]
             {
                 new InputElement("POSITION_IN", 0, Format.R32G32B32_Float, 0),
-                new InputElement("COLOR_IN", 0, Format.R32G32B32_Float, 12, 0)
+                new InputElement("COLOR_IN", 0, Format.R32G32B32_Float, 12, 0),
+                new InputElement("NORMAL_IN", 0, Format.R32G32B32_Float, 24, 0)
             }));
             passes.Add("cursor", new RenderPass("cursor", FillMode.Solid, new[]
             {
@@ -35,7 +36,6 @@ namespace SMEditor
         }
 
         public static Dictionary<string, RenderPass> passes = new Dictionary<string, RenderPass>();
-        public static List<TerrainMesh> terrainMeshes = new List<TerrainMesh>();
         
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Draw functions -- called in interval set in MainWindow.cs.
@@ -49,8 +49,9 @@ namespace SMEditor
             mainCamera.UpdateCameraBuffer();
 
             passes["terrain"].Use();
-            foreach (TerrainMesh m in terrainMeshes) m.Draw();
+            World.terrain.visualMesh.Draw();
 
+            passes["cursor"].Use();
             World.cursor.Draw();
 
             viewport.Present();
@@ -64,11 +65,12 @@ namespace SMEditor
     [StructLayout(LayoutKind.Sequential)]
     public struct BasicVertex
     {
-        public BasicVertex(Vector3 v, Vector3 col) { position = v; color = col; }
+        public BasicVertex(Vector3 v, Vector3 col, Vector3 n) { position = v; color = col; normal = n; }
         public Vector3 position;
         public Vector3 color;
+        public Vector3 normal;
     }
-    class BasicMesh
+    public class BasicMesh
     {
         public int indexCount = 0;
         public Buffer vb;
@@ -91,9 +93,10 @@ namespace SMEditor
             vbd = new BufferDescription
             {
                 Usage = ResourceUsage.Default,
-                SizeInBytes = Marshal.SizeOf(typeof(BasicVertex)) * vertices.Count,
+                SizeInBytes = Marshal.SizeOf(vertices[0]) * vertices.Count,
                 BindFlags = BindFlags.VertexBuffer
             };
+
             vb = new Buffer(Renderer.viewport.Device, vd, vbd);
             vbind = new VertexBufferBinding(vb, Marshal.SizeOf(typeof(BasicVertex)), 0);
 
@@ -124,7 +127,7 @@ namespace SMEditor
         }
     }
 
-    class TerrainMesh : BasicMesh
+    public class TerrainMesh : BasicMesh
     {
         public static bool drawPoints = false;
 

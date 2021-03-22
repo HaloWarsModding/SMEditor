@@ -7,12 +7,14 @@
 struct vs_input
 {
 	float3 pos : POSITION_IN;
+	float3 normal : NORMAL_IN;
 };
 
 struct gsps_input
 {
 	float4 pos : SV_POSITION;
 	float4 color : COLOR_GSPS;
+	float3 normal : NORMAL_GSPS;
 };
 
 gsps_input vs(vs_input input)
@@ -21,6 +23,7 @@ gsps_input vs(vs_input input)
 	float4x4 mv = mul(m, v);
 	float4x4 mvp = mul(mv, p);
 	output.pos = mul(float4(input.pos, 1), mvp);
+	output.normal = normalize(mul(input.normal, m));
 	return output;
 }
 
@@ -33,6 +36,7 @@ void gs(triangle gsps_input input[3] : SV_POSITION, inout TriangleStream<gsps_in
 	{
 		output.pos = input[i].pos;
 		output.color = float4(100/255.0F, 149/255.0F, 237/255.0F, 1);
+		output.normal = input[i].normal;
 		tris.Append(output);
 	}
 	tris.RestartStrip();
@@ -52,6 +56,12 @@ void gsVert(point gsps_input input[1] : SV_POSITION, inout PointStream<gsps_inpu
 
 float4 ps(gsps_input input) : SV_TARGET
 {
-	return input.color;
+	float4 finalColor;
+	float3 lightDir = -normalize(float3(0,-1,1));
+	float lightIntensity = saturate(dot(input.normal, lightDir));
+
+	finalColor = input.color * lightIntensity;
+
+	return finalColor;
 }
 

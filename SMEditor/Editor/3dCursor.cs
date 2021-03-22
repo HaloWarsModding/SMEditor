@@ -10,6 +10,8 @@ namespace SMEditor.Editor
 {
     public class _3dCursor
     {
+        public enum Mode { YAligned, NonAligned }
+        public Mode mode = Mode.YAligned;
         BasicMesh cursor;
         public Transform t = new Transform();
         public IntrRay3Triangle3 hitInfo;
@@ -19,29 +21,29 @@ namespace SMEditor.Editor
         {
             cursor = new BasicMesh();
             cursor.Init(new List<BasicVertex>() {
-new BasicVertex(new Vector3(0.000000F, 0.000000F, 0.000000F), new Vector3(0, 0, 0)),
-new BasicVertex(new Vector3(0.000000F, 0.000000F, 0.000000F), new Vector3(0, 0, 0)),
-new BasicVertex(new Vector3(0.000000F, 1.993729F, -1.000000F), new Vector3(0, 0, 0)),
-new BasicVertex(new Vector3(0.781832F, 1.993729F, -0.623490F), new Vector3(0, 0, 0)),
-new BasicVertex(new Vector3(0.974928F, 1.993729F, 0.222521F), new Vector3(0, 0, 0)),
-new BasicVertex(new Vector3(0.433884F, 1.993729F, 0.900969F), new Vector3(0, 0, 0)),
-new BasicVertex(new Vector3(-0.433884F, 1.993729F, 0.900969F), new Vector3(0, 0, 0)),
-new BasicVertex(new Vector3(-0.974928F, 1.993729F, 0.222521F), new Vector3(0, 0, 0)),
-new BasicVertex(new Vector3(-0.781832F, 1.993729F, -0.623490F), new Vector3(0, 0, 0)),
-new BasicVertex(new Vector3(-0.232554F, 2.165461F, 0.053079F), new Vector3(0, 0, 0)),
-new BasicVertex(new Vector3(-0.186494F, 2.165461F, -0.148724F), new Vector3(0, 0, 0)),
-new BasicVertex(new Vector3(-0.103496F, 2.165461F, 0.214912F), new Vector3(0, 0, 0)),
-new BasicVertex(new Vector3(0.103496F, 2.165461F, 0.214912F), new Vector3(0, 0, 0)),
-new BasicVertex(new Vector3(0.142345F, 5.531382F, 0.295583F), new Vector3(0, 0, 0)),
-new BasicVertex(new Vector3(-0.142345F, 5.531382F, 0.295583F), new Vector3(0, 0, 0)),
-new BasicVertex(new Vector3(0.186494F, 2.165461F, -0.148724F), new Vector3(0, 0, 0)),
-new BasicVertex(new Vector3(0.232554F, 2.165461F, 0.053079F), new Vector3(0, 0, 0)),
-new BasicVertex(new Vector3(0.000000F, 2.165461F, -0.238535F), new Vector3(0, 0, 0)),
-new BasicVertex(new Vector3(0.256496F, 5.531382F, -0.204548F), new Vector3(0, 0, 0)),
-new BasicVertex(new Vector3(0.000000F, 5.531382F, -0.328070F), new Vector3(0, 0, 0)),
-new BasicVertex(new Vector3(-0.256496F, 5.531382F, -0.204548F), new Vector3(0, 0, 0)),
-new BasicVertex(new Vector3(-0.319846F, 5.531382F, 0.073004F), new Vector3(0, 0, 0)),
-new BasicVertex(new Vector3(0.319846F, 5.531382F, 0.073004F), new Vector3(0, 0, 0))
+new BasicVertex(new Vector3(0.000000F, 0.000000F, 0.000000F), new Vector3(0, 0, 0), new Vector3(0,0,0)),
+new BasicVertex(new Vector3(0.000000F, 0.000000F, 0.000000F), new Vector3(0, 0, 0), new Vector3(0,0,0)),
+new BasicVertex(new Vector3(0.000000F, 1.993729F, -1.000000F), new Vector3(0, 0, 0), new Vector3(0,0,0)),
+new BasicVertex(new Vector3(0.781832F, 1.993729F, -0.623490F), new Vector3(0, 0, 0), new Vector3(0,0,0)),
+new BasicVertex(new Vector3(0.974928F, 1.993729F, 0.222521F), new Vector3(0, 0, 0), new Vector3(0,0,0)),
+new BasicVertex(new Vector3(0.433884F, 1.993729F, 0.900969F), new Vector3(0, 0, 0), new Vector3(0,0,0)),
+new BasicVertex(new Vector3(-0.433884F, 1.993729F, 0.900969F), new Vector3(0, 0, 0), new Vector3(0,0,0)),
+new BasicVertex(new Vector3(-0.974928F, 1.993729F, 0.222521F), new Vector3(0, 0, 0), new Vector3(0,0,0)),
+new BasicVertex(new Vector3(-0.781832F, 1.993729F, -0.623490F), new Vector3(0, 0, 0), new Vector3(0,0,0)),
+new BasicVertex(new Vector3(-0.232554F, 2.165461F, 0.053079F), new Vector3(0, 0, 0), new Vector3(0,0,0)),
+new BasicVertex(new Vector3(-0.186494F, 2.165461F, -0.148724F), new Vector3(0, 0, 0), new Vector3(0,0,0)),
+new BasicVertex(new Vector3(-0.103496F, 2.165461F, 0.214912F), new Vector3(0, 0, 0), new Vector3(0,0,0)),
+new BasicVertex(new Vector3(0.103496F, 2.165461F, 0.214912F), new Vector3(0, 0, 0), new Vector3(0,0,0)),
+new BasicVertex(new Vector3(0.142345F, 5.531382F, 0.295583F), new Vector3(0, 0, 0), new Vector3(0,0,0)),
+new BasicVertex(new Vector3(-0.142345F, 5.531382F, 0.295583F), new Vector3(0, 0, 0), new Vector3(0,0,0)),
+new BasicVertex(new Vector3(0.186494F, 2.165461F, -0.148724F), new Vector3(0, 0, 0), new Vector3(0,0,0)),
+new BasicVertex(new Vector3(0.232554F, 2.165461F, 0.053079F), new Vector3(0, 0, 0), new Vector3(0,0,0)),
+new BasicVertex(new Vector3(0.000000F, 2.165461F, -0.238535F), new Vector3(0, 0, 0), new Vector3(0,0,0)),
+new BasicVertex(new Vector3(0.256496F, 5.531382F, -0.204548F), new Vector3(0, 0, 0), new Vector3(0,0,0)),
+new BasicVertex(new Vector3(0.000000F, 5.531382F, -0.328070F), new Vector3(0, 0, 0), new Vector3(0,0,0)),
+new BasicVertex(new Vector3(-0.256496F, 5.531382F, -0.204548F), new Vector3(0, 0, 0), new Vector3(0,0,0)),
+new BasicVertex(new Vector3(-0.319846F, 5.531382F, 0.073004F), new Vector3(0, 0, 0), new Vector3(0,0,0)),
+new BasicVertex(new Vector3(0.319846F, 5.531382F, 0.073004F), new Vector3(0, 0, 0), new Vector3(0,0,0))
             }, new List<int>()
             {
 1, 2, 3,
