@@ -20,6 +20,7 @@ namespace SMEditor
         public static void Init()
         {
             viewport = Program.mainWindow.d3D11Control;
+
             mainCamera = new Camera();
 
             passes.Add("terrain", new RenderPass("terrain", FillMode.Solid, new[]

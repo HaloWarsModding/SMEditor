@@ -117,6 +117,7 @@ namespace SMEditor.Editor
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         public override void Update()
         {
+            if (!World.mouseInBounds) return;
 
             AddRadius(Input.mouseDeltaPos.Z / -10);
             //left shift not pressed
@@ -130,12 +131,18 @@ namespace SMEditor.Editor
                 //mmb pressed, alt not pressed
             if (Input.KeyIsDown(Key.LeftShift) && Input.MMBPressed && !Input.KeyIsDown(Key.LeftAlt))
             {
+                World.loopCursorInBounds = true;
+                World.Update();
                 MoveRelativeToScreen(-Input.mouseDeltaPos.X * 5F, Input.mouseDeltaPos.Y * 5F);
+                World.loopCursorInBounds = false;
             }
                 //mmb pressed, alt pressed
             if (Input.KeyIsDown(Key.LeftShift) && Input.MMBPressed && Input.KeyIsDown(Key.LeftAlt))
             {
+                World.loopCursorInBounds = true;
+                World.Update();
                 MoveRelativeToScreen(-Input.mouseDeltaPos.X, Input.mouseDeltaPos.Y);
+                World.loopCursorInBounds = false;
             }
 
         }

@@ -10,7 +10,8 @@ using System.Windows.Forms;
 using SlimDX;
 using SMEditor.Editor;
 using SMEditor.Editor.Tools;
-using SMEditor.Scenario.HWDE;
+using SMEditor.Editor.Layout;
+using Syncfusion.Windows.Forms.Tools;
 
 namespace SMEditor
 {
@@ -21,10 +22,23 @@ namespace SMEditor
             InitializeComponent();
         }
 
-        bool loaded = false;
-        Timer renderTimer = new Timer();
-        private void d3D11Control_Load(object sender, EventArgs e)
+        public ViewportPanel viewport;
+        public PropertiesPanel properties;
+
+        private void PRELOAD(object sender, EventArgs e)
         {
+            viewport = new ViewportPanel(false);
+            properties = new PropertiesPanel(false);
+
+            //init panels
+            viewport.Init();
+
+            dockingManager.DockControl(viewport.p, this, DockingStyle.Right, 700);
+            dockingManager.EnableContextMenu = true;
+        }
+        private void POSTLOAD()
+        {            
+            //init static systems
             Renderer.Init();
             Input.Init();
             ToolDock.Init();
@@ -32,18 +46,27 @@ namespace SMEditor
             renderTimer.Interval = 2; //ms
             renderTimer.Tick += new EventHandler(timer_Tick);
             renderTimer.Start();
-            
+
+            //init world
             World.terrain = new Terrain(256);
             World.cursor = new _3dCursor();
 
-            loaded = true;
+            d3d11loaded = true;
+        }
+        private void CLOSING(object sender, FormClosingEventArgs e)
+        {
+
         }
 
+        bool d3d11loaded = false;
+        Timer renderTimer = new Timer();
+        private void d3D11Control_Load(object sender, EventArgs e)
+        {
+        }
         private void d3D11Control_Resize(object sender, EventArgs e)
         {
-            if(loaded) Renderer.mainCamera.UpdateProjMatrix();
+            if(d3d11loaded) Renderer.mainCamera.UpdateProjMatrix();
         }
-
 
         public static List<IUpdateable> updateables = new List<IUpdateable>();
         private void timer_Tick(object sender, EventArgs e)
@@ -52,21 +75,6 @@ namespace SMEditor
             foreach(IUpdateable u in updateables) u.Update();
             World.Update();
             Renderer.Draw();
-        }
-
-        private void rangeSlider1_ValueChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void MainWindowOld_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private void rangeSlider1_ValueChanged_1(object sender, EventArgs e)
-        {
-
         }
     }
 }

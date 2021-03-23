@@ -2,6 +2,12 @@
 using Syncfusion.Windows.Forms.Tools;
 using System.Drawing.Drawing2D;
 using Syncfusion.WinForms.Controls;
+using System;
+using System.Windows.Forms;
+using Syncfusion.Runtime.Serialization;
+using SMEditor.Editor.Layout;
+using SMEditor.Editor;
+using SMEditor.Editor.Tools;
 
 namespace SMEditor
 {
@@ -33,30 +39,36 @@ namespace SMEditor
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindowOld));
             this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.windowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.d3D11Control = new SlimDX.Windows.D3D11Control();
-            this.mainToolBar = new System.Windows.Forms.ToolStrip();
             this.layout = new Syncfusion.Windows.Forms.Tools.SplitContainerAdv();
             this.contextToolBar = new System.Windows.Forms.ToolStrip();
             this.gridGroupingControl1 = new Syncfusion.Windows.Forms.Grid.Grouping.GridGroupingControl();
+            this.dockingManager = new Syncfusion.Windows.Forms.Tools.DockingManager(this.components);
             this.menuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.layout)).BeginInit();
             this.layout.Panel1.SuspendLayout();
             this.layout.Panel2.SuspendLayout();
             this.layout.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridGroupingControl1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dockingManager)).BeginInit();
             this.SuspendLayout();
             // 
             // menuStrip
             // 
             this.menuStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fileToolStripMenuItem});
+            this.fileToolStripMenuItem,
+            this.windowToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
-            this.menuStrip.Size = new System.Drawing.Size(1262, 28);
+            this.menuStrip.Padding = new System.Windows.Forms.Padding(5, 2, 0, 2);
+            this.menuStrip.Size = new System.Drawing.Size(1261, 28);
             this.menuStrip.TabIndex = 1;
             this.menuStrip.Text = "menuStrip1";
             // 
@@ -66,14 +78,21 @@ namespace SMEditor
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(44, 24);
             this.fileToolStripMenuItem.Text = "File";
             // 
+            // windowToolStripMenuItem
+            // 
+            this.windowToolStripMenuItem.Name = "windowToolStripMenuItem";
+            this.windowToolStripMenuItem.Size = new System.Drawing.Size(76, 24);
+            this.windowToolStripMenuItem.Text = "Window";
+            // 
             // statusStrip
             // 
             this.statusStrip.BackColor = System.Drawing.SystemColors.Control;
             this.statusStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip.Location = new System.Drawing.Point(0, 651);
             this.statusStrip.Name = "statusStrip";
+            this.statusStrip.Padding = new System.Windows.Forms.Padding(1, 0, 13, 0);
             this.statusStrip.RenderMode = System.Windows.Forms.ToolStripRenderMode.ManagerRenderMode;
-            this.statusStrip.Size = new System.Drawing.Size(1262, 22);
+            this.statusStrip.Size = new System.Drawing.Size(1261, 22);
             this.statusStrip.TabIndex = 3;
             this.statusStrip.Text = "statusStrip1";
             // 
@@ -85,20 +104,10 @@ namespace SMEditor
             this.d3D11Control.BackColor = System.Drawing.Color.Black;
             this.d3D11Control.Location = new System.Drawing.Point(3, 3);
             this.d3D11Control.Name = "d3D11Control";
-            this.d3D11Control.Size = new System.Drawing.Size(1235, 577);
+            this.d3D11Control.Size = new System.Drawing.Size(1, 1);
             this.d3D11Control.TabIndex = 2;
             this.d3D11Control.Load += new System.EventHandler(this.d3D11Control_Load);
             this.d3D11Control.Resize += new System.EventHandler(this.d3D11Control_Resize);
-            // 
-            // mainToolBar
-            // 
-            this.mainToolBar.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.mainToolBar.Location = new System.Drawing.Point(0, 28);
-            this.mainToolBar.Name = "mainToolBar";
-            this.mainToolBar.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.mainToolBar.Size = new System.Drawing.Size(1262, 25);
-            this.mainToolBar.TabIndex = 4;
-            this.mainToolBar.Text = "toolStrip1";
             // 
             // layout
             // 
@@ -117,7 +126,6 @@ namespace SMEditor
             // 
             // layout.Panel2
             // 
-            this.layout.Panel2.Controls.Add(this.d3D11Control);
             this.layout.Size = new System.Drawing.Size(1238, 580);
             this.layout.SplitterDistance = 300;
             this.layout.TabIndex = 5;
@@ -147,20 +155,43 @@ namespace SMEditor
             this.gridGroupingControl1.UseRightToLeftCompatibleTextBox = true;
             this.gridGroupingControl1.VersionInfo = "18.4460.0.30";
             // 
+            // dockingManager
+            // 
+            this.dockingManager.AnimateAutoHiddenWindow = true;
+            this.dockingManager.AutoHideEnabled = false;
+            this.dockingManager.AutoHideTabForeColor = System.Drawing.Color.Empty;
+            this.dockingManager.CloseTabOnMiddleClick = false;
+            this.dockingManager.DockLayoutStream = ((System.IO.MemoryStream)(resources.GetObject("dockingManager.DockLayoutStream")));
+            this.dockingManager.DockToFill = true;
+            this.dockingManager.DragProviderStyle = Syncfusion.Windows.Forms.Tools.DragProviderStyle.Office2016Colorful;
+            this.dockingManager.HostControl = this;
+            this.dockingManager.MetroButtonColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.dockingManager.MetroColor = System.Drawing.Color.FromArgb(((int)(((byte)(17)))), ((int)(((byte)(158)))), ((int)(((byte)(218)))));
+            this.dockingManager.MetroSplitterBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(155)))), ((int)(((byte)(159)))), ((int)(((byte)(183)))));
+            this.dockingManager.ReduceFlickeringInRtl = false;
+            this.dockingManager.ThemeName = "Default";
+            this.dockingManager.VisualStyle = Syncfusion.Windows.Forms.VisualStyle.Default;
+            this.dockingManager.CaptionButtons.Add(new Syncfusion.Windows.Forms.Tools.CaptionButton(Syncfusion.Windows.Forms.Tools.CaptionButtonType.Close, "CloseButton"));
+            this.dockingManager.CaptionButtons.Add(new Syncfusion.Windows.Forms.Tools.CaptionButton(Syncfusion.Windows.Forms.Tools.CaptionButtonType.Pin, "PinButton"));
+            this.dockingManager.CaptionButtons.Add(new Syncfusion.Windows.Forms.Tools.CaptionButton(Syncfusion.Windows.Forms.Tools.CaptionButtonType.Maximize, "MaximizeButton"));
+            this.dockingManager.CaptionButtons.Add(new Syncfusion.Windows.Forms.Tools.CaptionButton(Syncfusion.Windows.Forms.Tools.CaptionButtonType.Restore, "RestoreButton"));
+            this.dockingManager.CaptionButtons.Add(new Syncfusion.Windows.Forms.Tools.CaptionButton(Syncfusion.Windows.Forms.Tools.CaptionButtonType.Menu, "MenuButton"));
+            // 
             // MainWindowOld
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1262, 673);
-            this.Controls.Add(this.mainToolBar);
+            this.ClientSize = new System.Drawing.Size(1261, 673);
             this.Controls.Add(this.menuStrip);
             this.Controls.Add(this.statusStrip);
-            this.Controls.Add(this.layout);
             this.MainMenuStrip = this.menuStrip;
-            this.MinimumSize = new System.Drawing.Size(800, 350);
+            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.MinimumSize = new System.Drawing.Size(799, 349);
             this.Name = "MainWindowOld";
             this.Text = "SMEditor";
-            this.Load += new System.EventHandler(this.MainWindowOld_Load);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.CLOSING);
+            this.Load += new System.EventHandler(this.PRELOAD);
+            this.Shown += new EventHandler(this.internal_POSTLOAD);
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
             this.layout.Panel1.ResumeLayout(false);
@@ -169,9 +200,16 @@ namespace SMEditor
             ((System.ComponentModel.ISupportInitialize)(this.layout)).EndInit();
             this.layout.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.gridGroupingControl1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dockingManager)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
+        }
+
+        private void internal_POSTLOAD(object sender, EventArgs e)
+        {
+            this.Refresh();
+            POSTLOAD();
         }
 
         #endregion
@@ -180,9 +218,10 @@ namespace SMEditor
         private System.Windows.Forms.StatusStrip statusStrip;
         public SplitContainerAdv layout;
         public SlimDX.Windows.D3D11Control d3D11Control;
-        public System.Windows.Forms.ToolStrip mainToolBar;
         public System.Windows.Forms.ToolStrip contextToolBar;
         private Syncfusion.Windows.Forms.Grid.Grouping.GridGroupingControl gridGroupingControl1;
+        public DockingManager dockingManager;
+        public ToolStripMenuItem windowToolStripMenuItem;
     }
 }
 

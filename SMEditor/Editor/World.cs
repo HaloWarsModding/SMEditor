@@ -22,11 +22,9 @@ namespace SMEditor.Editor
 
         public static void Update()
         {
-            if (Input.KeyIsDown(SlimDX.DirectInput.Key.Escape)) loopCursorInBounds = !loopCursorInBounds;
-
             if(!freeze3dCursor) cursor.UpdatePositionOnTerrain();
-            
-                mouseInBounds = true;
+
+            mouseInBounds = true;
 
             if (Input.mouseAbsPosScreen.X < 0)
             {

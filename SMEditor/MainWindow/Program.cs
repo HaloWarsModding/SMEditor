@@ -11,6 +11,7 @@ namespace SMEditor
     {
         public static MainWindowOld mainWindow;
 
+        [STAThread]
         public static void Main(string[] args)
         {
             mainWindow = new MainWindowOld();

@@ -49,7 +49,7 @@ namespace SMEditor.Editor.Tools
         public virtual void PerformFunction() { }
         public override void Update()
         {
-            if (enabled) PerformFunction();
+            if (enabled && World.mouseInBounds) PerformFunction();
         }
 
         public ToolStripButton button = new ToolStripButton();
