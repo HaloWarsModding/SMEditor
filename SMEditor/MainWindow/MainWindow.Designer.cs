@@ -53,7 +53,6 @@ namespace SMEditor
             this.menuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.layout)).BeginInit();
             this.layout.Panel1.SuspendLayout();
-            this.layout.Panel2.SuspendLayout();
             this.layout.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridGroupingControl1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dockingManager)).BeginInit();
@@ -123,9 +122,6 @@ namespace SMEditor
             // 
             this.layout.Panel1.Controls.Add(this.contextToolBar);
             this.layout.Panel1MinSize = 300;
-            // 
-            // layout.Panel2
-            // 
             this.layout.Size = new System.Drawing.Size(1238, 580);
             this.layout.SplitterDistance = 300;
             this.layout.TabIndex = 5;
@@ -191,12 +187,11 @@ namespace SMEditor
             this.Text = "SMEditor";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.CLOSING);
             this.Load += new System.EventHandler(this.PRELOAD);
-            this.Shown += new EventHandler(this.internal_POSTLOAD);
+            this.Shown += new System.EventHandler(this.internal_POSTLOAD);
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
             this.layout.Panel1.ResumeLayout(false);
             this.layout.Panel1.PerformLayout();
-            this.layout.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.layout)).EndInit();
             this.layout.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.gridGroupingControl1)).EndInit();

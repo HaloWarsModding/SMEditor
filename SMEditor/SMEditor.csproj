@@ -49,6 +49,9 @@
     <Reference Include="Caliburn.Micro.Platform, Version=2.0.2.0, Culture=neutral, PublicKeyToken=8e5891231f2ed21f, processorArchitecture=MSIL">
       <HintPath>..\packages\Caliburn.Micro.2.0.2\lib\net45\Caliburn.Micro.Platform.dll</HintPath>
     </Reference>
+    <Reference Include="ColorSlider">
+      <HintPath>..\..\..\..\Desktop\ColorSlider\ColorSlider\bin\Release\ColorSlider.dll</HintPath>
+    </Reference>
     <Reference Include="EnvDTE, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
@@ -142,8 +145,8 @@
   <ItemGroup>
     <Compile Include="Editor\3dCursor.cs" />
     <Compile Include="Editor\Layout\DockableWindow.cs" />
-    <Compile Include="Editor\Layout\Properties\Properties.cs" />
-    <Compile Include="Editor\Layout\Viewport\Viewport.cs" />
+    <Compile Include="Editor\Layout\PropertiesPanel.cs" />
+    <Compile Include="Editor\Layout\ViewportPanel.cs" />
     <Compile Include="Editor\Tools\Plateau\Plateau.cs" />
     <Compile Include="Editor\Tools\Terraformer\Terraformer.cs" />
     <Compile Include="Editor\Tools\Tool.cs" />

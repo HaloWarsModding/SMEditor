@@ -46,7 +46,7 @@ namespace SMEditor.Editor
 
             if (tsmi.Checked)
             {
-                Program.mainWindow.dockingManager.DockControl(p, Program.mainWindow, Syncfusion.Windows.Forms.Tools.DockingStyle.Bottom, 100);
+                Program.mainWindow.dockingManager.DockControl(p, Program.mainWindow, Syncfusion.Windows.Forms.Tools.DockingStyle.Bottom, 150);
                 Program.mainWindow.dockingManager.SetMenuButtonVisibility(p, false);
                 Program.mainWindow.dockingManager.SetCloseButtonVisibility(p, false);
                 Program.mainWindow.dockingManager.SetDockLabel(p, name);

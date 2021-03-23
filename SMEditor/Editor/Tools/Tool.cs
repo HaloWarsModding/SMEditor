@@ -41,7 +41,7 @@ namespace SMEditor.Editor.Tools
             button.DisplayStyle = ToolStripItemDisplayStyle.Image;
             button.Image = System.Drawing.Image.FromFile("Thumbs/tools/" + n + ".png");
             button.Click += new EventHandler(button_click);
-            Program.mainWindow.contextToolBar.Items.Add(button);
+            Program.mainWindow.viewport.tb.Items.Add(button);
         }
         protected bool enabled = false;
         public virtual void Enable() { enabled = true; }

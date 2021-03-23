@@ -32,6 +32,7 @@ namespace SMEditor
 
             //init panels
             viewport.Init();
+            properties.Init();
 
             dockingManager.DockControl(viewport.p, this, DockingStyle.Right, 700);
             dockingManager.EnableContextMenu = true;
