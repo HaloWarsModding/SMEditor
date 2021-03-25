@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using g3;
+using SMEditor.Editor.Layout;
 
 namespace SMEditor.Editor.Tools
 {
@@ -12,24 +13,18 @@ namespace SMEditor.Editor.Tools
     {
         public Terraformer() : base("Terraformer") { }
 
-        ToolOptionSlider radius = new ToolOptionSlider("Radius");
-        ToolOptionSlider intensity = new ToolOptionSlider("Intensity");
+        SliderProperty radius = new SliderProperty("Radius", 25, 0, 150);
+        SliderProperty intensity = new SliderProperty("Intensity", 1, 0, 2);
         public override void Enable()
         {
             base.Enable();
-
-            intensity.Register(5);
-
-            radius.tb.Maximum = 50;
-            radius.tb.Minimum = 1;
-            radius.tb.Value = 12;
-            radius.Register(43);
+            Program.mainWindow.propertiesPanel.SetProperties(SelectedType.Tool, "Terraformer", 
+                new PropertyField[2] { radius, intensity });
         }
         public override void Disable()
         {
             base.Disable();
-            intensity.Unregister();
-            radius.Unregister();
+            Program.mainWindow.propertiesPanel.ClearProperties();
         }
 
         bool released = false;
@@ -40,28 +35,26 @@ namespace SMEditor.Editor.Tools
             if (Input.LMBPressed)
             {
                 released = false;
-                if (World.cursor.hitInfoExists)
+
+                foreach (Terrain.TerrainIndexMapping tim in Editor.scenario.terrain.GetVertsInRadius(Editor.cursor.t.position, radius.GetValue()))
                 {
-                    foreach(int i in World.terrain.GetVertsInRadius(World.terrain.dMesh.GetTriangle(World.cursor.currHitTri).a, radius.tb.Value))
-                    {
-                        World.terrain.EditVertexHeight(i, .10F, Terrain.EditMode.Add);
-                    }
-                    
-                    World.terrain.UpdateVisual();
-                    collisionMeshUpdateNeeded = true;
+                    Editor.scenario.terrain.EditVertexHeight(tim, .10f, Terrain.EditMode.Add);
                 }
+
+                Editor.scenario.terrain.UpdateVisual();
+                collisionMeshUpdateNeeded = true;
             }
             if (Input.RMBPressed)
             {
                 released = false;
-                if (World.cursor.hitInfoExists)
+                if (Editor.cursor.hitInfoExists)
                 {
-                    foreach (int i in World.terrain.GetVertsInRadius(World.terrain.dMesh.GetTriangle(World.cursor.currHitTri).a, radius.tb.Value))
-                    {
-                        World.terrain.EditVertexHeight(i, -.10F, Terrain.EditMode.Add);
-                    }
+                    //foreach (int i in Editor.scenario.terrain.GetVertsInRadius(Editor.scenario.terrain.dMesh.GetTriangle(Editor.cursor.currHitTri).a, radius.GetValue()))
+                    //{
+                    //    Editor.scenario.terrain.EditVertexHeight(i, -.10F, Terrain.EditMode.Add);
+                    //}
                     
-                    World.terrain.UpdateVisual();
+                    Editor.scenario.terrain.UpdateVisual();
                     collisionMeshUpdateNeeded = true;
                 }
             }
@@ -70,8 +63,8 @@ namespace SMEditor.Editor.Tools
             if (released && collisionMeshUpdateNeeded)
             {
                 collisionMeshUpdateNeeded = false;
-                World.terrain.UpdateCollisionModel();
-                World.terrain.UpdateNormalsFinal();
+                Editor.scenario.terrain.UpdateCollisionModel();
+                Editor.scenario.terrain.UpdateNormalsFinal();
             }
         }
     }

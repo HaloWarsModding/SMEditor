@@ -8,6 +8,7 @@ using Syncfusion.Runtime.Serialization;
 using SMEditor.Editor.Layout;
 using SMEditor.Editor;
 using SMEditor.Editor.Tools;
+using SMEditor.MainWindow.NewProjectWizard;
 
 namespace SMEditor
 {
@@ -43,6 +44,7 @@ namespace SMEditor
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindowOld));
             this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.testToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.windowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.d3D11Control = new SlimDX.Windows.D3D11Control();
@@ -50,6 +52,7 @@ namespace SMEditor
             this.contextToolBar = new System.Windows.Forms.ToolStrip();
             this.gridGroupingControl1 = new Syncfusion.Windows.Forms.Grid.Grouping.GridGroupingControl();
             this.dockingManager = new Syncfusion.Windows.Forms.Tools.DockingManager(this.components);
+            this.openProjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.layout)).BeginInit();
             this.layout.Panel1.SuspendLayout();
@@ -73,9 +76,19 @@ namespace SMEditor
             // 
             // fileToolStripMenuItem
             // 
+            this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.testToolStripMenuItem,
+            this.openProjectToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(44, 24);
             this.fileToolStripMenuItem.Text = "File";
+            // 
+            // testToolStripMenuItem
+            // 
+            this.testToolStripMenuItem.Name = "testToolStripMenuItem";
+            this.testToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
+            this.testToolStripMenuItem.Text = "New";
+            this.testToolStripMenuItem.Click += new System.EventHandler(this.NewProject_Click);
             // 
             // windowToolStripMenuItem
             // 
@@ -163,15 +176,22 @@ namespace SMEditor
             this.dockingManager.HostControl = this;
             this.dockingManager.MetroButtonColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.dockingManager.MetroColor = System.Drawing.Color.FromArgb(((int)(((byte)(17)))), ((int)(((byte)(158)))), ((int)(((byte)(218)))));
-            this.dockingManager.MetroSplitterBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(155)))), ((int)(((byte)(159)))), ((int)(((byte)(183)))));
+            this.dockingManager.MetroSplitterBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(17)))), ((int)(((byte)(158)))), ((int)(((byte)(218)))));
             this.dockingManager.ReduceFlickeringInRtl = false;
             this.dockingManager.ThemeName = "Default";
+            this.dockingManager.ThemeStyle.DockPreviewBorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
             this.dockingManager.VisualStyle = Syncfusion.Windows.Forms.VisualStyle.Default;
             this.dockingManager.CaptionButtons.Add(new Syncfusion.Windows.Forms.Tools.CaptionButton(Syncfusion.Windows.Forms.Tools.CaptionButtonType.Close, "CloseButton"));
             this.dockingManager.CaptionButtons.Add(new Syncfusion.Windows.Forms.Tools.CaptionButton(Syncfusion.Windows.Forms.Tools.CaptionButtonType.Pin, "PinButton"));
             this.dockingManager.CaptionButtons.Add(new Syncfusion.Windows.Forms.Tools.CaptionButton(Syncfusion.Windows.Forms.Tools.CaptionButtonType.Maximize, "MaximizeButton"));
             this.dockingManager.CaptionButtons.Add(new Syncfusion.Windows.Forms.Tools.CaptionButton(Syncfusion.Windows.Forms.Tools.CaptionButtonType.Restore, "RestoreButton"));
             this.dockingManager.CaptionButtons.Add(new Syncfusion.Windows.Forms.Tools.CaptionButton(Syncfusion.Windows.Forms.Tools.CaptionButtonType.Menu, "MenuButton"));
+            // 
+            // openProjectToolStripMenuItem
+            // 
+            this.openProjectToolStripMenuItem.Name = "openProjectToolStripMenuItem";
+            this.openProjectToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
+            this.openProjectToolStripMenuItem.Text = "Open Project";
             // 
             // MainWindowOld
             // 
@@ -201,6 +221,24 @@ namespace SMEditor
 
         }
 
+        NewProjectWizard newProjectWizard;
+        private void NewProject_Click(object sender, EventArgs e)
+        {
+            newProjectWizard = new NewProjectWizard();
+            newProjectWizard.Show();
+            newProjectWizard.Location = new System.Drawing.Point(Location.X + (Width / 2) - (newProjectWizard.Width/2), Location.Y + (Height / 2)- (newProjectWizard.Height / 2));
+        }
+        private void LoadProject_Click(object sender, EventArgs e)
+        {
+        }
+        private void SaveProject_Click(object sender, EventArgs e)
+        {
+        }
+        private void SaveAsProject_Click(object sender, EventArgs e)
+        {
+        }
+
+
         private void internal_POSTLOAD(object sender, EventArgs e)
         {
             this.Refresh();
@@ -217,6 +255,8 @@ namespace SMEditor
         private Syncfusion.Windows.Forms.Grid.Grouping.GridGroupingControl gridGroupingControl1;
         public DockingManager dockingManager;
         public ToolStripMenuItem windowToolStripMenuItem;
+        private ToolStripMenuItem testToolStripMenuItem;
+        private ToolStripMenuItem openProjectToolStripMenuItem;
     }
 }
 

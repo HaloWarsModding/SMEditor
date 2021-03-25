@@ -14,7 +14,6 @@ namespace SMEditor.Editor
         public Mode mode = Mode.YAligned;
         BasicMesh cursor;
         public Transform t = new Transform();
-        public IntrRay3Triangle3 hitInfo;
         public bool hitInfoExists;
 
         public _3dCursor()
@@ -88,7 +87,6 @@ new BasicVertex(new Vector3(0.319846F, 5.531382F, 0.073004F), new Vector3(0, 0, 
 9, 21, 20,
             });
         }
-        public int currHitTri;
         public void UpdatePositionOnTerrain()
         {
             hitInfoExists = false;
@@ -101,16 +99,7 @@ new BasicVertex(new Vector3(0.319846F, 5.531382F, 0.073004F), new Vector3(0, 0, 
             Vector3d dir = Convert.ToV3d(Vector3.TransformNormal(new Vector3(vx, vy, 1.0F), wInv));
 
             Ray3d ray = new Ray3d(pos, dir);
-            currHitTri = World.terrain.dMeshAABB.FindNearestHitTriangle(ray);
-
-            if (currHitTri != -1)
-            {
-                hitInfo = MeshQueries.TriangleIntersection(World.terrain.dMesh, currHitTri, ray);
-                Vector3d v = hitInfo.Ray.PointAt(hitInfo.RayParameter);
-                t.position = Convert.ToV3(v);
-
-                hitInfoExists = true;
-            }
+            t.position = Convert.ToV3(Editor.scenario.terrain.GetHitLocationFromRay(ray));
         }
         public void Draw()
         {

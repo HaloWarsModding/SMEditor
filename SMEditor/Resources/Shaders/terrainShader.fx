@@ -6,8 +6,9 @@
 
 struct vs_input
 {
-	float3 pos : POSITION_IN;
-	float3 normal : NORMAL_IN;
+	float posx : POSITION_IN_X;
+	float posy : POSITION_IN_Y;
+	float posz : POSITION_IN_Z;
 };
 
 struct gsps_input
@@ -20,10 +21,11 @@ struct gsps_input
 gsps_input vs(vs_input input)
 {
 	gsps_input output;
+	float3 pos3 = float3(input.posx, input.posy, input.posz);
 	float4x4 mv = mul(m, v);
 	float4x4 mvp = mul(mv, p);
-	output.pos = mul(float4(input.pos, 1), mvp);
-	output.normal = normalize(mul(input.normal, m));
+	output.pos = mul(float4(pos3, 1), mvp);
+	output.normal = normalize(mul(float3(0,1,0), m));
 	return output;
 }
 

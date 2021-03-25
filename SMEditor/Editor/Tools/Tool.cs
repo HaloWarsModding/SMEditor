@@ -41,15 +41,23 @@ namespace SMEditor.Editor.Tools
             button.DisplayStyle = ToolStripItemDisplayStyle.Image;
             button.Image = System.Drawing.Image.FromFile("Thumbs/tools/" + n + ".png");
             button.Click += new EventHandler(button_click);
-            Program.mainWindow.viewport.tb.Items.Add(button);
+            Program.mainWindow.viewportPanel.tb.Items.Add(button);
         }
         protected bool enabled = false;
-        public virtual void Enable() { enabled = true; }
-        public virtual void Disable() { enabled = false; }
+        public virtual void Enable()
+        {
+            button.Checked = true;
+            enabled = true;
+        }
+        public virtual void Disable()
+        {
+            button.Checked = false;
+            enabled = false;
+        }
         public virtual void PerformFunction() { }
         public override void Update()
         {
-            if (enabled && World.mouseInBounds) PerformFunction();
+            if (enabled && Editor.mouseInBounds) PerformFunction();
         }
 
         public ToolStripButton button = new ToolStripButton();
@@ -57,63 +65,6 @@ namespace SMEditor.Editor.Tools
         {
             foreach (Tool t in ToolDock.tools.Values) t.Disable();
             Enable();
-        }
-    }
-    
-
-    public class ToolOption
-    {
-        public virtual void Register(int heightOffset) { }
-        public virtual void Unregister() { }
-    }
-
-    public class ToolOptionSlider : ToolOption
-    {
-        public ToolOptionSlider(string _name)
-        {
-            l.Text = _name;
-
-            tb.Height = 45;
-            tb.Style = TrackBarEx.Theme.Office2016Colorful;
-            tb.ValueChanged += new EventHandler(tbVal_changed);
-            
-            n.ReadOnly = true;
-        }
-        public override void Register(int heightOffset)
-        {
-            tb.Height = 45;
-            tb.Width = 232;
-            tb.Location = new System.Drawing.Point(58, 40 + heightOffset);
-            tb.BringToFront();
-            Program.mainWindow.layout.Panel1.Controls.Add(tb);
-            tb.Anchor = AnchorStyles.Right | AnchorStyles.Top;
-
-
-            n.Width = 50;
-            n.Location = new System.Drawing.Point(8, 40 + heightOffset);
-            n.Parent = Program.mainWindow.layout.Panel1;
-            Program.mainWindow.layout.Panel1.Controls.Add(n);
-
-
-            //last
-            l.BackColor = System.Drawing.Color.Transparent;
-            l.Location = new System.Drawing.Point(8, 25 + heightOffset);
-            Program.mainWindow.layout.Panel1.Controls.Add(l);
-        }
-        public override void Unregister()
-        {
-            Program.mainWindow.layout.Panel1.Controls.Remove(tb);
-            Program.mainWindow.layout.Panel1.Controls.Remove(l);
-            Program.mainWindow.layout.Panel1.Controls.Remove(n);
-        }
-        
-        public TrackBarEx tb = new TrackBarEx();
-        public Label l = new Label();
-        public NumericTextBox n = new NumericTextBox();
-
-        private void tbVal_changed(object o, EventArgs e)
-        {
-            n.Text = tb.Value.ToString();
         }
     }
 }

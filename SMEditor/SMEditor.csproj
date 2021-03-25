@@ -14,7 +14,7 @@
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -67,6 +67,9 @@
     <Reference Include="Gu.Wpf.Localization, Version=6.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Gu.Wpf.Localization.6.1.0.0\lib\net45\Gu.Wpf.Localization.dll</HintPath>
     </Reference>
+    <Reference Include="JeremyAnsel.DirectX.DXMath, Version=2.0.22.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\JeremyAnsel.DirectX.DXMath.2.0.22\lib\net45\JeremyAnsel.DirectX.DXMath.dll</HintPath>
+    </Reference>
     <Reference Include="MahApps.Metro, Version=1.2.4.0, Culture=neutral, PublicKeyToken=f4fb5a3c4d1e5b4f, processorArchitecture=MSIL">
       <HintPath>..\packages\MahApps.Metro.1.2.4.0\lib\net45\MahApps.Metro.dll</HintPath>
     </Reference>
@@ -75,11 +78,13 @@
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="SlimDX, Version=4.0.13.43, Culture=neutral, PublicKeyToken=b1b0c32fd1ffe4f9, processorArchitecture=x86">
-      <HintPath>..\packages\SlimDX.4.0.13.44\lib\NET40\SlimDX.dll</HintPath>
+    <Reference Include="SlimDX, Version=4.0.13.43, Culture=neutral, PublicKeyToken=b1b0c32fd1ffe4f9, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\SlimDX SDK (January 2012)\Bin\net40\x64\SlimDX.dll</HintPath>
     </Reference>
-    <Reference Include="SlimDX.D3D11Control, Version=1.0.0.1, Culture=neutral, processorArchitecture=x86">
-      <HintPath>..\packages\SlimDX.D3D11Control.1.0.1\lib\net40\SlimDX.D3D11Control.dll</HintPath>
+    <Reference Include="SlimDX.D3D11Control, Version=1.0.0.1, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\SlimDX SDK (January 2012)\Bin\net40\x64\SlimDX.D3D11Control.dll</HintPath>
     </Reference>
     <Reference Include="Syncfusion.Grid.Base, Version=18.4460.0.30, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89" />
     <Reference Include="Syncfusion.Grid.Grouping.Windows, Version=18.4460.0.30, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89, processorArchitecture=MSIL" />
@@ -144,13 +149,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Editor\3dCursor.cs" />
+    <Compile Include="Editor\HWDEScenarioData.cs" />
     <Compile Include="Editor\Layout\DockableWindow.cs" />
+    <Compile Include="Editor\Layout\OutputPanel.cs" />
     <Compile Include="Editor\Layout\PropertiesPanel.cs" />
     <Compile Include="Editor\Layout\ViewportPanel.cs" />
     <Compile Include="Editor\Tools\Plateau\Plateau.cs" />
     <Compile Include="Editor\Tools\Terraformer\Terraformer.cs" />
     <Compile Include="Editor\Tools\Tool.cs" />
-    <Compile Include="Editor\World.cs" />
+    <Compile Include="Editor\Editor.cs" />
     <Compile Include="Editor\Editables\Grid.cs" />
     <Compile Include="Editor\Editables\Terrain.cs" />
     <Compile Include="MainWindow\IUpdateable.cs" />
@@ -162,15 +169,23 @@
     <Compile Include="MainWindow\MainWindow.Designer.cs">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </Compile>
+    <Compile Include="MainWindow\NewProjectWizard\NewProjectWizard.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainWindow\NewProjectWizard\NewProjectWizard.Designer.cs">
+      <DependentUpon>NewProjectWizard.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainWindow\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Editor\Camera.cs" />
     <Compile Include="Editor\Renderer.cs" />
     <Compile Include="Editor\Transform.cs" />
-    <Compile Include="Scenario\HWDE\HWDEScenario.cs" />
     <Compile Include="Util.cs" />
     <EmbeddedResource Include="MainWindow\MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainWindow\NewProjectWizard\NewProjectWizard.resx">
+      <DependentUpon>NewProjectWizard.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

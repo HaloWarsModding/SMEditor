@@ -11,17 +11,21 @@ using SMEditor;
 
 namespace SMEditor.Editor
 {
-    public static class World
+    public static class Editor
     {
-        public static Terrain terrain;
+        public static HWDEScenarioData scenario;
         public static _3dCursor cursor;
 
         public static bool mouseInBounds = false;
         public static bool loopCursorInBounds = false;
         public static bool freeze3dCursor = false;
 
+        public static bool projectLoaded = false;
+
         public static void Update()
         {
+            if (!projectLoaded) return;
+
             if(!freeze3dCursor) cursor.UpdatePositionOnTerrain();
 
             mouseInBounds = true;
@@ -49,6 +53,17 @@ namespace SMEditor.Editor
             }
 
             ToolDock.UpdateAll();
+        }
+        public static void LoadNewProject(HWDEScenarioSize s)
+        {
+            if (projectLoaded) UnloadProject();
+            scenario = new HWDEScenarioData(s);
+            projectLoaded = true;
+        }
+        public static void UnloadProject()
+        {
+            scenario.Dispose();
+            projectLoaded = false;
         }
     }
 }

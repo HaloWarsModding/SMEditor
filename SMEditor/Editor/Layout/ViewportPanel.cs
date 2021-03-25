@@ -17,6 +17,7 @@ namespace SMEditor.Editor.Layout
         public override void Init()
         {
             p.Controls.Add(tb);
+            tb.Items.Add("Tools:");
             p.Controls.Add(Program.mainWindow.d3D11Control);
             Program.mainWindow.d3D11Control.Parent = p;
             Program.mainWindow.d3D11Control.Size = new System.Drawing.Size(p.Width - 5, p.Height - 6);

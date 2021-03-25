@@ -10,6 +10,8 @@ using SlimDX.Direct3D11;
 using SlimDX.DXGI;
 using Buffer = SlimDX.Direct3D11.Buffer;
 using SMEditor.Editor;
+using BepuPhysics.Collidables;
+using g3;
 
 namespace SMEditor
 {
@@ -22,13 +24,14 @@ namespace SMEditor
             viewport = Program.mainWindow.d3D11Control;
 
             mainCamera = new Camera();
-
-            passes.Add("terrain", new RenderPass("terrain", FillMode.Solid, new[]
+            
+            Terrain.renderPass = new RenderPass("terrain", FillMode.Solid, new[]
             {
-                new InputElement("POSITION_IN", 0, Format.R32G32B32_Float, 0),
-                new InputElement("COLOR_IN", 0, Format.R32G32B32_Float, 12, 0),
-                new InputElement("NORMAL_IN", 0, Format.R32G32B32_Float, 24, 0)
-            }));
+                new InputElement("POSITION_IN_X", 0, Format.R32_Float, 0, 0),
+                new InputElement("POSITION_IN_Y", 0, Format.R32_Float, 4, 0),
+                new InputElement("POSITION_IN_Z", 0, Format.R32_Float, 8, 0),
+            });
+
             passes.Add("cursor", new RenderPass("cursor", FillMode.Solid, new[]
             {
                 new InputElement("POSITION_IN", 0, Format.R32G32B32_Float, 0),
@@ -48,12 +51,13 @@ namespace SMEditor
             viewport.Device.ImmediateContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
 
             mainCamera.UpdateCameraBuffer();
+            
 
-            passes["terrain"].Use();
-            World.terrain.visualMesh.Draw();
+            if (Editor.Editor.projectLoaded) Editor.Editor.scenario.terrain.Draw();
+
 
             passes["cursor"].Use();
-            World.cursor.Draw();
+            Editor.Editor.cursor.Draw();
 
             viewport.Present();
         }
@@ -112,7 +116,7 @@ namespace SMEditor
 
             indexCount = indices.Count;
 
-            UpdateVertexData(vertices);
+            //UpdateVertexData(vertices);
         }
         public virtual void Draw()
         {
@@ -126,28 +130,36 @@ namespace SMEditor
             Renderer.viewport.Context.UpdateSubresource(new DataBox(0, 0, vd), vb, 0);
             vd.Dispose();
         }
-    }
-
-    public class TerrainMesh : BasicMesh
-    {
-        public static bool drawPoints = false;
-
-        public TerrainMesh() { }
-        public override void Init(List<BasicVertex> vertices, List<int> indices)
+        public void Dispose()
         {
-            base.Init(vertices, indices);
-        }
-        public override void Draw()
-        {
-            Renderer.mainCamera.SetModelMatrix(Matrix.Transformation(new Vector3(0, 0, 0),
-                Quaternion.Identity, new Vector3(1, 1, 1), new Vector3(0, 0, 0), Quaternion.Identity, new Vector3(0, 0, 0)));
-            base.Draw();
-        }
-        public override void UpdateVertexData(List<BasicVertex> vertices)
-        {
-            base.UpdateVertexData(vertices);
+            vb.Dispose();
+            ib.Dispose();
         }
     }
+
+    //public class TerrainMesh
+    //{
+    //    public static bool drawPoints = false;
+    //    RenderPass renderPass;
+
+    //    public TerrainMesh(DMesh3 mesh)
+    //    {
+    //        renderPass = new RenderPass("terrain", FillMode.Solid, new[]
+    //        {
+    //            new InputElement("POSITION_IN", 0, Format.R32G32B32_Float, 0),
+    //            new InputElement("COLOR_IN", 0, Format.R32G32B32_Float, 12, 0),
+    //            new InputElement("NORMAL_IN", 0, Format.R32G32B32_Float, 24, 0)
+    //        });
+    //    }
+    //    public void Draw()
+    //    {
+    //        Renderer.mainCamera.SetModelMatrix(Matrix.Transformation(new Vector3(0, 0, 0),
+    //            Quaternion.Identity, new Vector3(1, 1, 1), new Vector3(0, 0, 0), Quaternion.Identity, new Vector3(0, 0, 0)));
+    //    }
+    //    public void UpdateVertexData(DMesh3 mesh)
+    //    {
+    //    }
+    //}
 
     [StructLayout(LayoutKind.Sequential)]
     public struct GridVertex
@@ -250,7 +262,7 @@ namespace SMEditor
     }
 
     
-    class RenderPass
+    public class RenderPass : IDisposable
     {
         public RasterizerState RS;
         static ShaderSignature Sig;
@@ -296,6 +308,14 @@ namespace SMEditor
             Renderer.viewport.Device.ImmediateContext.PixelShader.Set(PS);
             Renderer.viewport.Device.ImmediateContext.GeometryShader.Set(GS_Tri);
             Renderer.viewport.Device.ImmediateContext.InputAssembler.InputLayout = Inpl;
+        }
+
+        void IDisposable.Dispose()
+        {
+            VS.Dispose();
+            GS_Tri.Dispose();
+            PS.Dispose();
+            RS.Dispose();
         }
     }
 }

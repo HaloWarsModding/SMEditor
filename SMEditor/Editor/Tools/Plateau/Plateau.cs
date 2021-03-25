@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SMEditor.Editor.Layout;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,38 +9,42 @@ namespace SMEditor.Editor.Tools
 {
     class Plateau : Tool
     {
+        SliderProperty radius = new SliderProperty("Radius", 12, 0, 50);
+        SliderProperty height = new SliderProperty("Height", 0, -999, 999, DecimalPlaceCount.Single);
         public Plateau() : base("Plateau") { }
 
         bool released = false;
         bool collisionMeshUpdateNeeded = false;
         public override void PerformFunction()
         {
+            return;
+
             released = true;
             if (Input.LMBPressed)
             {
                 released = false;
-                if (World.cursor.hitInfoExists)
+                if (Editor.cursor.hitInfoExists)
                 {
-                    foreach (int i in World.terrain.GetVertsInRadius(World.terrain.dMesh.GetTriangle(World.cursor.currHitTri).a, 12))
-                    {
-                        World.terrain.EditVertexHeight(i, .10F, Terrain.EditMode.Set);
-                    }
+                    //foreach (int i in Editor.scenario.terrain.GetVertsInRadius(Editor.scenario.terrain.dMesh.GetTriangle(Editor.cursor.currHitTri).a, radius.GetValue()))
+                    //{
+                    //    Editor.scenario.terrain.EditVertexHeight(i, height.GetValue(), Terrain.EditMode.Set);
+                    //}
 
-                    World.terrain.UpdateVisual();
+                    Editor.scenario.terrain.UpdateVisual();
                     collisionMeshUpdateNeeded = true;
                 }
             }
             if (Input.RMBPressed)
             {
                 released = false;
-                if (World.cursor.hitInfoExists)
+                if (Editor.cursor.hitInfoExists)
                 {
-                    foreach (int i in World.terrain.GetVertsInRadius(World.terrain.dMesh.GetTriangle(World.cursor.currHitTri).a, 12))
-                    {
-                        World.terrain.EditVertexHeight(i, -.10F, Terrain.EditMode.Set);
-                    }
+                    //foreach (int i in Editor.scenario.terrain.GetVertsInRadius(Editor.scenario.terrain.dMesh.GetTriangle(Editor.cursor.currHitTri).a, radius.GetValue()))
+                    //{
+                    //    Editor.scenario.terrain.EditVertexHeight(i, 0, Terrain.EditMode.Set);
+                    //}
 
-                    World.terrain.UpdateVisual();
+                    Editor.scenario.terrain.UpdateVisual();
                     collisionMeshUpdateNeeded = true;
                 }
             }
@@ -48,8 +53,19 @@ namespace SMEditor.Editor.Tools
             if (released && collisionMeshUpdateNeeded)
             {
                 collisionMeshUpdateNeeded = false;
-                World.terrain.UpdateCollisionModel();
+                Editor.scenario.terrain.UpdateCollisionModel();
+                Editor.scenario.terrain.UpdateNormalsFinal();
             }
+        }
+        public override void Enable()
+        {
+            base.Enable();
+            Program.mainWindow.propertiesPanel.SetProperties(SelectedType.Tool, "Plateau", new PropertyField[2] { radius, height });
+        }
+        public override void Disable()
+        {
+            base.Disable();
+            Program.mainWindow.propertiesPanel.ClearProperties();
         }
     }
 }

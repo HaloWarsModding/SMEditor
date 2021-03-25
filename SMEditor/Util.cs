@@ -104,7 +104,7 @@ namespace SMEditor
                 Normals[tri.b] += a * N;
                 Normals[tri.c] += a * N;
                 //if (Normals[vi].LengthSquared > MathUtil.ZeroTolerancef)
-                    //Normals[vi] = Normals[vi].Normalized;
+                //Normals[vi] = Normals[vi].Normalized;
             };
 
             //gParallel.BlockStartEnd(0, NV - 1, (vi_start, vi_end) =>
@@ -138,6 +138,20 @@ namespace SMEditor
         }
 
 
+    }
+
+    static class Util
+    {
+        public static bool PointIsInsideBounds(Vector3d point, Vector3d min, Vector3d max)
+        {
+            return
+                point.x > min.x &&
+                point.y > min.y &&
+                point.z > min.z &&
+                point.x < max.x &&
+                point.y < max.y &&
+                point.z < max.z;
+        }
     }
 }
 
