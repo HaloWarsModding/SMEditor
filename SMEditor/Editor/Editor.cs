@@ -8,18 +8,42 @@ using System.Threading.Tasks;
 using g3;
 using SMEditor.Editor.Tools;
 using SMEditor;
+using SMEditor.Editor.Layout;
 
 namespace SMEditor.Editor
 {
     public static class Editor
     {
-        public static HWDEScenarioData scenario;
+        //Editor
         public static _3dCursor cursor;
+        public static void ClearCursorState()
+        {
+            //Basically, deselect everything so that there is no issues with selecting something else.
+            foreach (Tool t in ToolDock.tools.Values) t.Disable();
+        }
+
+        //Scenario
+        public static HWDEScenarioData scenario;
+        public static void LoadNewProject(HWDEScenarioSize s)
+        {
+            if (projectLoaded) UnloadProject();
+            scenario = new HWDEScenarioData(s);
+            projectLoaded = true;
+        }
+        public static void UnloadProject()
+        {
+            scenario.Dispose();
+            projectLoaded = false;
+        }
+
+        //Panels
+        public static ViewportPanel viewportPanel;
+        public static PropertiesPanel propertiesPanel;
+        public static OutputPanel outputPanel;
 
         public static bool mouseInBounds = false;
         public static bool loopCursorInBounds = false;
         public static bool freeze3dCursor = false;
-
         public static bool projectLoaded = false;
 
         public static void Update()
@@ -54,16 +78,27 @@ namespace SMEditor.Editor
 
             ToolDock.UpdateAll();
         }
-        public static void LoadNewProject(HWDEScenarioSize s)
-        {
-            if (projectLoaded) UnloadProject();
-            scenario = new HWDEScenarioData(s);
-            projectLoaded = true;
+        public static void PreUILoad()
+        {            
+            //init panels
+            viewportPanel = new ViewportPanel(false);
+            propertiesPanel = new PropertiesPanel(false);
+            outputPanel = new OutputPanel();
+
+            viewportPanel.Init();
+            propertiesPanel.Init();
+            outputPanel.Init();
         }
-        public static void UnloadProject()
-        {
-            scenario.Dispose();
-            projectLoaded = false;
+        public static void PostUILoad()
+        {            
+            //init static systems
+            Renderer.Init();
+            Input.Init();
+            ToolDock.Init();
+
+            //init world
+            cursor = new _3dCursor();
+            LoadNewProject(HWDEScenarioSize.small512);
         }
     }
 }

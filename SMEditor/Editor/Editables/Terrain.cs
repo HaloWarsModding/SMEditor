@@ -14,61 +14,80 @@ using SlimDX.Direct3D11;
 using SlimDX.DXGI;
 using Buffer = SlimDX.Direct3D11.Buffer;
 using BepuPhysics.Collidables;
+using System.Runtime.InteropServices;
 
 namespace SMEditor.Editor
 {
+
     public class TerrainChunk
     {
-        int xPos, yPos, size;
+        public const int size = 64;
+        int xPos, yPos;
         public int arrayX, arrayY;
-
         public DMesh3 dMesh;
         public DMeshAABBTree3 dMeshAABB;
 
-        public TerrainChunk(int _arrX, int _arrY)
+        //Ctor
+        public TerrainChunk(int _arrX, int _arrY, int terrainSize)
         {
             //this can be done here because it wont ever need to be modified.
             List<int> inds = new List<int>();
 
             #region Init
-            size = 64;
-            xPos = _arrX * size;
-            yPos = _arrY * size;
+            xPos = _arrX * (size - 1);
+            yPos = _arrY * (size - 1);
             arrayX = _arrX;
             arrayY = _arrY;
 
             dMesh = new DMesh3(MeshComponents.VertexNormals | MeshComponents.VertexColors);
-            
-            for (int i = 0; i <= size; i++)
-            {
-                for (int j = 0; j <= size; j++)
-                {
-                    Vector3d v = new Vector3d((float)i + xPos, 0, (float)j + yPos);
-                    //vertices.Add(new BasicVertex(Convert.ToV3(v), new Vector3(0, 0, 0), new Vector3(0, 1, 0)));
-                    dMesh.AppendVertex(new NewVertexInfo(v, new Vector3f(0, 0, 0)));
 
-                    visualVerts.Add(Convert.ToV3(v));
-                    vertNeedsCollisionUpdate.Add(false);
-                }
-            }
             for (int i = 0; i < size; i++)
             {
                 for (int j = 0; j < size; j++)
                 {
-                    int row1 = j * (size + 1);
-                    int row2 = (j + 1) * (size + 1);
-                    //tri 1
-                    dMesh.AppendTriangle(row1 + i, row1 + i + 1, row2 + i + 1);
-                    //tri 2
-                    dMesh.AppendTriangle(row1 + i, row2 + i + 1, row2 + i);
-                    
-                    inds.Add(row1 + i);
-                    inds.Add(row1 + i + 1);
-                    inds.Add(row2 + i + 1);
+                    Vector3d v = new Vector3d((float)i + xPos, 0, (float)j + yPos);
+                    //vertices.Add(new BasicVertex(Convert.ToV3(v), new Vector3(0, 0, 0), new Vector3(0, 1, 0)));
+                    dMesh.AppendVertex(new NewVertexInfo(v, new Vector3f(0, 1, 0)));
 
-                    inds.Add(row1 + i);
-                    inds.Add(row2 + i + 1);
-                    inds.Add(row2 + i);
+                    //fancy uv stuff. automatically sets the uvs so the texture is spreat over the entire terrain.
+                    float uvu, uvv;
+                    uvu =     ((((1f / size) * i) / terrainSize) + ((1f / terrainSize) * arrayX));
+                    uvv = 1 - ((((1f / size) * j) / terrainSize) + ((1f / terrainSize) * arrayY));
+                    if (i==0 && j==0)Console.Write(uvu + " " + uvv);
+                    visualUVs.Add(new Vector2(uvu, uvv));
+
+                    visualVerts.Add(Convert.ToV3(v));
+                    visualNormals.Add(new Vector3(0, 1, 0));
+                    vertNeedsCollisionUpdate.Add(false);
+                }
+            }
+            for (int j = 0; j < size - 1; j++)
+            {
+                for (int i = 0; i < size - 1; i++)
+                {
+                    int i1, i2, i3, i4, i5, i6;
+
+                    int row1 = i * size;
+                    int row2 = (i + 1) * size;
+
+                    i1 = row1 + j;
+                    i2 = row1 + j + 1;
+                    i3 = row2 + j;
+
+                    i4 = row2 + j;
+                    i5 = row2 + j + 1;
+                    i6 = row1 + j + 1;
+
+                    if (i == size - 1 && j == size - 1) Console.Write(i4 + " " + i5 + " " + i6);
+
+                    dMesh.AppendTriangle(i1, i2, i3);
+                    dMesh.AppendTriangle(i4, i5, i6);
+                    inds.Add(i1);
+                    inds.Add(i2);
+                    inds.Add(i3);
+                    inds.Add(i4);
+                    inds.Add(i5);
+                    inds.Add(i6);
                 }
             }
             dMesh.EnableVertexNormals(new Vector3f(0, 1, 0));
@@ -76,26 +95,42 @@ namespace SMEditor.Editor
             dMeshAABB = new DMeshAABBTree3(dMesh);
             dMeshAABB.Build();
             #endregion
+            //
+            //
+            InitRendering(inds);
+        }
 
-
-
-
-
-            #region Init Rendering
-
+        //Rendering
+        BufferDescription vbd, ibd;
+        public int indexCount = 0;
+        public Buffer vb;
+        public Buffer ib;
+        public VertexBufferBinding vbind;
+        public Vector3 location = new Vector3(0, 0, 0);
+        public Vector3 scale = new Vector3(1, 1, 1);
+        //
+        public List<Vector3> visualVerts = new List<Vector3>();
+        public List<Vector3> visualNormals = new List<Vector3>();
+        private List<Vector2> visualUVs = new List<Vector2>();
+        public List<bool> vertNeedsCollisionUpdate = new List<bool>();
+        //
+        private void InitRendering(List<int> inds)
+        {
             indexCount = inds.Count();
-            DataStream vd = new DataStream(GetFloatsFromDMesh(), true, true); vd.Position = 0;
-            DataStream id = new DataStream(inds.ToArray(), true, true); id.Position = 0;
+            DataStream vd = new DataStream(PackedVertexData(), true, true);
+            vd.Position = 0;
+            DataStream id = new DataStream(inds.ToArray(), true, true);
+            id.Position = 0;
 
             vbd = new BufferDescription
             {
                 Usage = ResourceUsage.Default,
-                SizeInBytes = 4 * dMesh.VerticesBuffer.Count(),
+                SizeInBytes = sizeof(float) * 8 * (size * size),
                 BindFlags = BindFlags.VertexBuffer
             };
 
             vb = new Buffer(Renderer.viewport.Device, vd, vbd);
-            vbind = new VertexBufferBinding(vb, 12, 0);
+            vbind = new VertexBufferBinding(vb, sizeof(float) * 8, 0);
 
             //indices
             ibd = new BufferDescription(
@@ -108,21 +143,7 @@ namespace SMEditor.Editor
 
             vd.Dispose();
             id.Dispose();
-            #endregion
         }
-
-        #region Rendering
-        BufferDescription vbd, ibd;
-        public int indexCount = 0;
-        public Buffer vb;
-        public Buffer ib;
-        public VertexBufferBinding vbind;
-        public Vector3 location = new Vector3(0, 0, 0);
-        public Vector3 scale = new Vector3(1, 1, 1);
-
-        public List<Vector3> visualVerts = new List<Vector3>();
-        public List<bool> vertNeedsCollisionUpdate = new List<bool>();
-
         public void Draw()
         {
             Terrain.renderPass.Use();
@@ -134,9 +155,13 @@ namespace SMEditor.Editor
             Renderer.viewport.Device.ImmediateContext.InputAssembler.SetIndexBuffer(ib, Format.R32_SInt, 0);
             Renderer.viewport.Device.ImmediateContext.DrawIndexed(indexCount, 0, 0);
         }
+        
+        //Updates
         public void UpdateVisual()
         {
-            DataStream vd = new DataStream(visualVerts.ToArray(), true, true); vd.Position = 0;
+            DataStream vd = new DataStream(PackedVertexData(), true, true);
+            vd.Position = 0;
+
             Renderer.viewport.Context.UpdateSubresource(new DataBox(0, 0, vd), vb, 0);
             vd.Dispose();
         }
@@ -153,11 +178,23 @@ namespace SMEditor.Editor
             dMeshAABB.Build();
         }
 
-        private float[] GetFloatsFromDMesh()
+        //Gets
+        private float[] PackedVertexData()
         {
-            return dMesh.VerticesBuffer.ToList().ConvertAll(x => (float)(double)x).ToArray();
+            List<float> f = new List<float>(visualVerts.Count * 8);
+            for (int i = 0; i < visualVerts.Count; i++)
+            {
+                f.Add(visualVerts[i].X);
+                f.Add(visualVerts[i].Y);
+                f.Add(visualVerts[i].Z);
+                f.Add(visualUVs[i].X);
+                f.Add(visualUVs[i].Y);
+                f.Add(visualNormals[i].X);
+                f.Add(visualNormals[i].Y);
+                f.Add(visualNormals[i].Z);
+            }
+            return f.ToArray();
         }
-        #endregion
     }
 
 
@@ -166,12 +203,17 @@ namespace SMEditor.Editor
     public class Terrain
     {
         public int chunksPerAxis;
-        public static RenderPass renderPass;
+        public static RenderPass renderPass = new RenderPass("terrain", FillMode.Solid, new[]
+            {
+                new InputElement("POSITION_IN", 0, Format.R32G32B32_Float, 0, 0),
+                new InputElement("UV_IN", 0, Format.R32G32_Float, 12, 0),
+                new InputElement("NORMAL_IN", 0, Format.R32G32B32_Float, 20, 0)
+            });
         public TerrainChunk[,] terrainChunks;
         private bool[,] terrainChunkNeedsAABBUpdate;
         private bool[,] terrainChunkNeedsVisualUpdate;
-
-
+        
+        //Ctor
         public Terrain(int _chunksPerAxis)
         {
             chunksPerAxis = _chunksPerAxis;
@@ -180,81 +222,18 @@ namespace SMEditor.Editor
             terrainChunkNeedsVisualUpdate = new bool[_chunksPerAxis, _chunksPerAxis];
             for (int x = 0; x < _chunksPerAxis; x++)
             {
-                for(int y = 0; y < _chunksPerAxis; y++)
+                for (int y = 0; y < _chunksPerAxis; y++)
                 {
-                    terrainChunks[x, y] = new TerrainChunk(x, y);
+                    terrainChunks[x, y] = new TerrainChunk(x, y, _chunksPerAxis);
                     terrainChunkNeedsAABBUpdate[x, y] = false;
                     terrainChunkNeedsVisualUpdate[x, y] = false;
                 }
             }
+
+            InitRendering();
         }
-
-        public Vector3d GetHitLocationFromRay(Ray3d ray)
-        {
-            Vector3d vout = new Vector3d(0,0,0);
-
-            int currHitTri = -1;
-            IntrRay3Triangle3 hitInfo;
-            int x = 0, y = 0;
-
-            foreach(TerrainChunk t in terrainChunks)
-            {
-                currHitTri = t.dMeshAABB.FindNearestHitTriangle(ray);
-                if (currHitTri != -1)
-                {
-                    x = t.arrayX;
-                    y = t.arrayY;
-                    break;
-                }
-            }
-
-            if (currHitTri != -1)
-            {
-                hitInfo = MeshQueries.TriangleIntersection(terrainChunks[x, y].dMesh, currHitTri, ray);
-                vout = hitInfo.Ray.PointAt(hitInfo.RayParameter);
-            }
-
-            return vout;
-        }
-
-        //TODO: REMOVE!
-        public void UpdateLighting()
-        {
-            //SMMeshNormals.QuickCompute(dMesh);
-            //for(int i = 0; i < vertices.Count; i++)
-            //{
-            //    if (vertexNeedsLightingUpdate[i])
-            //    {
-            //        vertices[i] = new BasicVertex(vertices[i].position, vertices[i].color, Convert.ToV3(dMesh.GetVertexNormal(i)));
-            //        vertexNeedsLightingUpdate[i] = false;
-            //    }
-            //}
-        }
-        public void UpdateNormalFast(int vID)
-        {
-            //List<int> t = new List<int>();
-            //dMesh.GetVtxTriangles(vID, t, false);
-            //foreach (int triI in t)
-            //{
-            //    Index3i tri = dMesh.GetTriangle(triI);
-            //    Vector3d va = Convert.ToV3d(vertices[tri.a].position);
-            //    Vector3d vb = Convert.ToV3d(vertices[tri.b].position);
-            //    Vector3d vc = Convert.ToV3d(vertices[tri.c].position);
-            //    Vector3d N = MathUtil.Normal(ref va, ref vb, ref vc);
-            //    double a = MathUtil.Area(ref va, ref vb, ref vc);
-            //    vertices[vID] = new BasicVertex(vertices[vID].position, vertices[vID].color, Convert.ToV3(a * N));
-            //}
-        }
-        public void UpdateNormalsFinal()
-        {
-            //MeshNormals.QuickCompute(dMesh);
-            //for(int i = 0; i < vertices.Count; i++)
-            //{
-            //    vertices[i] = new BasicVertex(vertices[i].position, vertices[i].color, Convert.ToV3(dMesh.GetVertexNormal(i)));
-            //}
-            //UpdateVisual();
-        }
-
+        
+        //Gets
         public class TerrainIndexMapping { public int index, x, y; public TerrainIndexMapping(int _i, int _x, int _y) { index = _i; x = _x; y = _y; } }
         public List<TerrainIndexMapping> GetVertsInRadius(Vector3 position, double radius)
         {
@@ -262,7 +241,7 @@ namespace SMEditor.Editor
 
             Vector3d v3d = Convert.ToV3d(position);
             AxisAlignedBox3d pointBox = new AxisAlignedBox3d(v3d, radius);
-            int vID = -1;
+            pointBox.Min += new Vector3d(0, -1000f, 0); pointBox.Max += new Vector3d(0, 1000f, 0); //adjust box to always find neighboring chunks.
 
             foreach (TerrainChunk t in terrainChunks)
             {
@@ -310,6 +289,35 @@ namespace SMEditor.Editor
             //return finalVerts.Distinct().ToList();
             #endregion
         }
+        public Vector3d GetHitLocationFromRay(Ray3d ray)
+        {
+            Vector3d vout = new Vector3d(0, 0, 0);
+
+            int currHitTri = -1;
+            IntrRay3Triangle3 hitInfo;
+            int x = 0, y = 0;
+
+            foreach (TerrainChunk t in terrainChunks)
+            {
+                currHitTri = t.dMeshAABB.FindNearestHitTriangle(ray);
+                if (currHitTri != -1)
+                {
+                    x = t.arrayX;
+                    y = t.arrayY;
+                    break;
+                }
+            }
+
+            if (currHitTri != -1)
+            {
+                hitInfo = MeshQueries.TriangleIntersection(terrainChunks[x, y].dMesh, currHitTri, ray);
+                vout = hitInfo.Ray.PointAt(hitInfo.RayParameter);
+            }
+
+            return vout;
+        }
+
+        //Edits
         public enum EditMode { Add, Set }
         public void EditVertexHeight(TerrainIndexMapping map, float height, EditMode mode)
         {
@@ -317,17 +325,14 @@ namespace SMEditor.Editor
             if (mode == EditMode.Add) v.Y += height;
             if (mode == EditMode.Set) v.Y = height;
 
-            //UpdateNormalFast(vID);
             terrainChunks[map.x, map.y].visualVerts[map.index] = v;
             terrainChunks[map.x, map.y].vertNeedsCollisionUpdate[map.index] = true;
 
             terrainChunkNeedsVisualUpdate[map.x, map.y] = true;
             terrainChunkNeedsAABBUpdate[map.x, map.y] = true;
-
-            //vertexNeedsCollisionUpdate[vID] = true;
-            //vertexNeedsLightingUpdate[vID] = true;
         }
 
+        //Updates
         public void UpdateVisual()
         {
             for (int x = 0; x < chunksPerAxis; x++)
@@ -357,17 +362,27 @@ namespace SMEditor.Editor
             }
         }
 
-        public void Dispose()
-        {
-        }
+        //Rendering
+        //  Texutring
+        //      Splatting
 
+        //      Texture representation
+        private void InitRendering()
+        {
+            ShaderResourceView view = ShaderResourceView.FromFile(Renderer.viewport.Device, "thumbs/sizechart.png");
+            Renderer.viewport.Device.ImmediateContext.PixelShader.SetShaderResource(view, 0);
+        }
         public void Draw()
         {
-            foreach(TerrainChunk t in terrainChunks)
+            foreach (TerrainChunk t in terrainChunks)
             {
                 t.Draw();
             }
         }
-        
+
+        //Dtor
+        public void Dispose()
+        {
+        }
     }
 }

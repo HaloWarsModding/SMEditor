@@ -24,13 +24,6 @@ namespace SMEditor
             viewport = Program.mainWindow.d3D11Control;
 
             mainCamera = new Camera();
-            
-            Terrain.renderPass = new RenderPass("terrain", FillMode.Solid, new[]
-            {
-                new InputElement("POSITION_IN_X", 0, Format.R32_Float, 0, 0),
-                new InputElement("POSITION_IN_Y", 0, Format.R32_Float, 4, 0),
-                new InputElement("POSITION_IN_Z", 0, Format.R32_Float, 8, 0),
-            });
 
             passes.Add("cursor", new RenderPass("cursor", FillMode.Solid, new[]
             {

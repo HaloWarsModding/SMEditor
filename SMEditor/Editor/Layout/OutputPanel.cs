@@ -18,20 +18,20 @@ namespace SMEditor.Editor.Layout
         {
             if (value == ' ' || value == '\n') return;
 
-            Program.mainWindow.outputPanel.lb.Items.Add(value);
-            if (Program.mainWindow.outputPanel.lb.Items.Count > 100)
+            Editor.outputPanel.lb.Items.Add(value);
+            if (Editor.outputPanel.lb.Items.Count > 100)
             {
-                Program.mainWindow.outputPanel.lb.Items.RemoveAt(0);
+                Editor.outputPanel.lb.Items.RemoveAt(0);
             }
         }
         public override void Write(string value)
         {
             if (value == " "  || value == "\n" || value == "") return;
 
-            Program.mainWindow.outputPanel.lb.Items.Add(value);
-            if (Program.mainWindow.outputPanel.lb.Items.Count > 100)
+            Editor.outputPanel.lb.Items.Add(value);
+            if (Editor.outputPanel.lb.Items.Count > 100)
             {
-                Program.mainWindow.outputPanel.lb.Items.RemoveAt(0);
+                Editor.outputPanel.lb.Items.RemoveAt(0);
             }
         }
     }

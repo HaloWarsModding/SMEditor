@@ -54,18 +54,17 @@ namespace SMEditor.Editor.Tools
             {
                 collisionMeshUpdateNeeded = false;
                 Editor.scenario.terrain.UpdateCollisionModel();
-                Editor.scenario.terrain.UpdateNormalsFinal();
             }
         }
         public override void Enable()
         {
             base.Enable();
-            Program.mainWindow.propertiesPanel.SetProperties(SelectedType.Tool, "Plateau", new PropertyField[2] { radius, height });
+            Editor.propertiesPanel.SetProperties(SelectedType.Tool, "Plateau", new PropertyField[2] { radius, height });
         }
         public override void Disable()
         {
             base.Disable();
-            Program.mainWindow.propertiesPanel.ClearProperties();
+            Editor.propertiesPanel.ClearProperties();
         }
     }
 }

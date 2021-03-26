@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SMEditor", "SMEditor\SMEdit
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SMEditorWPF", "SMEditorWPF\SMEditorWPF.csproj", "{0FDABBE8-B452-45E9-9782-436BEE824BFE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XMFloat3PK101010_Tests", "XMFloat3PK101010_Tests\XMFloat3PK101010_Tests.csproj", "{F3A5BD0A-FF0C-47AC-BA99-BBED6ADEAFD9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Playground", "XMFloat3PK101010_Tests\Playground.csproj", "{F3A5BD0A-FF0C-47AC-BA99-BBED6ADEAFD9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

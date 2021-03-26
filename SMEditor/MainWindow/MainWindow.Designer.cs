@@ -118,7 +118,6 @@ namespace SMEditor
             this.d3D11Control.Name = "d3D11Control";
             this.d3D11Control.Size = new System.Drawing.Size(1, 1);
             this.d3D11Control.TabIndex = 2;
-            this.d3D11Control.Load += new System.EventHandler(this.d3D11Control_Load);
             this.d3D11Control.Resize += new System.EventHandler(this.d3D11Control_Resize);
             // 
             // layout

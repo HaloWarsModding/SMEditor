@@ -19,6 +19,17 @@ namespace SMEditor
         {
             return new Vector3d(v.X, v.Y, v.Z);
         }
+        public static List<float> GetFloats(this List<Vector3> v)
+        {
+            List<float> f = new List<float>(v.Count);
+            foreach (Vector3 vec in v)
+            {
+                f.Add(vec.X);
+                f.Add(vec.Y);
+                f.Add(vec.Z);
+            }
+            return f;
+        }
     }
 
     public class SMMeshNormals

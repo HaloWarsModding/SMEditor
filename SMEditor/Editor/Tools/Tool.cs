@@ -41,7 +41,7 @@ namespace SMEditor.Editor.Tools
             button.DisplayStyle = ToolStripItemDisplayStyle.Image;
             button.Image = System.Drawing.Image.FromFile("Thumbs/tools/" + n + ".png");
             button.Click += new EventHandler(button_click);
-            Program.mainWindow.viewportPanel.tb.Items.Add(button);
+            Editor.viewportPanel.tb.Items.Add(button);
         }
         protected bool enabled = false;
         public virtual void Enable()
@@ -63,7 +63,7 @@ namespace SMEditor.Editor.Tools
         public ToolStripButton button = new ToolStripButton();
         private void button_click(object o, EventArgs e)
         {
-            foreach (Tool t in ToolDock.tools.Values) t.Disable();
+            Editor.ClearCursorState();
             Enable();
         }
     }

@@ -18,62 +18,47 @@ namespace SMEditor
 {
     public partial class MainWindowOld : Form
     {
+        //Loading
+        bool uiLoaded = false;
         public MainWindowOld()
         {
             InitializeComponent();
         }
-
-        public ViewportPanel viewportPanel;
-        public PropertiesPanel propertiesPanel;
-        public OutputPanel outputPanel;
-
         private void PRELOAD(object sender, EventArgs e)
         {
-            //init panels
-            viewportPanel = new ViewportPanel(false);
-            propertiesPanel = new PropertiesPanel(false);
-            outputPanel = new OutputPanel();
+            Editor.Editor.PreUILoad();
 
-            viewportPanel.Init();
-            propertiesPanel.Init();
-            outputPanel.Init();
-
-            dockingManager.DockControl(viewportPanel.p, this, DockingStyle.Right, 700);
+            //TODO: Replace this with a proper layout manager.
+            dockingManager.DockControl(Editor.Editor.viewportPanel.p, this, DockingStyle.Right, 700);
             dockingManager.EnableContextMenu = false;
         }
         private void POSTLOAD()
-        {            
-            //init static systems
-            Renderer.Init();
-            Input.Init();
-            ToolDock.Init();
-
+        {
+            //Rendering interval init
             renderTimer.Interval = 1; //ms
             renderTimer.Tick += new EventHandler(timer_Tick);
             renderTimer.Start();
 
-            //init world
-            Editor.Editor.cursor = new _3dCursor();
-            Editor.Editor.LoadNewProject(HWDEScenarioSize.small512);
+            //Comes after renderTimer init
+            Editor.Editor.PostUILoad();
 
-            d3d11loaded = true;
-
+            uiLoaded = true;
         }
         private void CLOSING(object sender, FormClosingEventArgs e)
         {
 
         }
 
-        bool d3d11loaded = false;
-        Timer renderTimer = new Timer();
-        private void d3D11Control_Load(object sender, EventArgs e)
-        {
-        }
+        //d3D11Control
+        //TODO: move the d3D11Control to the Renderer class.
         private void d3D11Control_Resize(object sender, EventArgs e)
         {
-            if(d3d11loaded) Renderer.mainCamera.UpdateProjMatrix();
+            if(uiLoaded) Renderer.mainCamera.UpdateProjMatrix();
         }
 
+        //Frame Interval
+        //TODO MAYBE: Move this functionality to the Editor class?
+        Timer renderTimer = new Timer();
         Stopwatch frameTimer = new Stopwatch();
         long time = 0; int frames = 0;
         public static List<IUpdateable> updateables = new List<IUpdateable>();

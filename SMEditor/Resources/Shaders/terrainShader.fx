@@ -4,11 +4,21 @@
 	float4x4 p;
 }
 
+Texture2D tex;
+SamplerState samplerState
+{
+	Filter = ANISOTROPIC;
+	MaxAnisotropy = 4;
+
+	AddressU = WRAP;
+	AddressV = WRAP;
+};
+
 struct vs_input
 {
-	float posx : POSITION_IN_X;
-	float posy : POSITION_IN_Y;
-	float posz : POSITION_IN_Z;
+	float3 pos : POSITION_IN;
+	float2 uv : UV_IN;
+	float3 normal : NORMAL_IN;
 };
 
 struct gsps_input
@@ -16,16 +26,17 @@ struct gsps_input
 	float4 pos : SV_POSITION;
 	float4 color : COLOR_GSPS;
 	float3 normal : NORMAL_GSPS;
+	float2 uv : UV_GSPS;
 };
 
 gsps_input vs(vs_input input)
 {
 	gsps_input output;
-	float3 pos3 = float3(input.posx, input.posy, input.posz);
 	float4x4 mv = mul(m, v);
 	float4x4 mvp = mul(mv, p);
-	output.pos = mul(float4(pos3, 1), mvp);
-	output.normal = normalize(mul(float3(0,1,0), m));
+	output.pos = mul(float4(input.pos, 1), mvp);
+	output.normal = normalize(mul(input.normal, m));
+	output.uv = input.uv;
 	return output;
 }
 
@@ -37,8 +48,9 @@ void gs(triangle gsps_input input[3] : SV_POSITION, inout TriangleStream<gsps_in
 	for (int i = 0; i < 3; i++)
 	{
 		output.pos = input[i].pos;
-		output.color = float4(100/255.0F, 149/255.0F, 237/255.0F, 1);
+		output.color = float4(100/255.0F, 149/255.0F, 237/255.0F, 1); //cornflower blue
 		output.normal = input[i].normal;
+		output.uv = input[i].uv;
 		tris.Append(output);
 	}
 	tris.RestartStrip();
@@ -51,6 +63,7 @@ void gsVert(point gsps_input input[1] : SV_POSITION, inout PointStream<gsps_inpu
 
 	output.pos = input[0].pos + float4(0, .01F, 0, 0);
 	output.color = float4(0, 0, 0, 1);
+	output.uv = input[0].uv;
 	tris.Append(output);
 
 	tris.RestartStrip();
@@ -62,7 +75,7 @@ float4 ps(gsps_input input) : SV_TARGET
 	float3 lightDir = -normalize(float3(0,-1,1));
 	float lightIntensity = saturate(dot(input.normal, lightDir));
 
-	finalColor = input.color * lightIntensity;
+	finalColor = tex.Sample(samplerState, input.uv);
 
 	return finalColor;
 }
