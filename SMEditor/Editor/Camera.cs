@@ -175,6 +175,7 @@ namespace SMEditor.Editor
             Renderer.viewport.Context.UpdateSubresource(new DataBox(0, 0, db), cb, 0);
 
             Renderer.viewport.Device.ImmediateContext.VertexShader.SetConstantBuffer(cb, 0);
+            db.Dispose();
         }
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     }

@@ -12,7 +12,10 @@ class Program
 {
     static void Main(string[] args)
     {
+        //AAA();
+
         TextureTest();
+
         //byte[] xtd = File.ReadAllBytes(@"C:\Program Files (x86)\Steam\steamapps\common\HaloWarsDE\StumpyHWDEMod\SMEditorTests\scenario\skirmish\design\chasms\chasms_clean.xtd");
         //for (int i = 0; i < 589824; i++)
         //{
@@ -74,14 +77,30 @@ class Program
     }
     static void TextureTest()
     {
+        int[] shifts = { 8, 4, 0, 12 };
         byte[] xtd = File.ReadAllBytes(@"C:\Program Files (x86)\Steam\steamapps\common\HaloWarsDE\StumpyHWDEMod\SMEditorTests\scenario\skirmish\design\chasms\chasms_clean.xtt");
-
         //byte[] dxt1 = xtd.ToList().GetRange(2047016, 1179648).ToArray();
-        for(int i = 0; i < 1179648; i++)
-        {
-            xtd[i+2047016] = 0x00;
 
-            if (i % 10000 == 0) Console.WriteLine(i);
+
+
+
+
+
+
+
+
+        //xtd[3552] = 0;
+        //int offset = 1650596;
+        int offset = 6300;
+        for(int i = 0; i < 8192; i+=2)
+        {
+            xtd[i + offset + 0] = 0x00;
+            xtd[i + offset + 1] = 0x00;
+        }
+        for (int i = 8192; i < 8192*2; i += 2)
+        {
+            xtd[i + offset + 0] = 0x0F;
+            xtd[i + offset + 1] = 0x00;
         }
         File.WriteAllBytes(@"C:\Program Files (x86)\Steam\steamapps\common\HaloWarsDE\StumpyHWDEMod\SMEditorTests\scenario\skirmish\design\chasms\chasms.xtt", xtd);
         //byte[] xtd = File.ReadAllBytes(@"C:\Program Files (x86)\Steam\steamapps\common\HaloWarsDE\StumpyHWDEMod\SMEditorTests\scenario\skirmish\design\chasms.xtt");
@@ -90,5 +109,12 @@ class Program
         //Console.WriteLine(dds.Height);
 
         //Console.ReadKey();
+    }
+    static void AAA()
+    {
+        foreach (string p in Directory.GetFiles(@"C:\Program Files (x86)\Steam\steamapps\common\HaloWarsDE\Extract\art\terrain", "*", SearchOption.AllDirectories))
+        {
+            File.Move(p, p + ".dds");
+        }
     }
 }

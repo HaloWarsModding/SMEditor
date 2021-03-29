@@ -45,7 +45,6 @@ namespace SMEditor
 
             mainCamera.UpdateCameraBuffer();
             
-
             if (Editor.Editor.projectLoaded) Editor.Editor.scenario.terrain.Draw();
 
 
@@ -263,9 +262,11 @@ namespace SMEditor
         public PixelShader PS;
         public GeometryShader GS_Tri;
         public InputLayout Inpl;
-        public RenderPass(string name, FillMode fillMode, InputElement[] inplElems) { Init(name, inplElems, fillMode); }
-        private void Init(string name, InputElement[] inplElems, FillMode fillMode)
+        bool geom;
+        public RenderPass(string name, FillMode fillMode, InputElement[] inplElems, bool useGeomShader = true) { Init(name, inplElems, fillMode, useGeomShader); }
+        private void Init(string name, InputElement[] inplElems, FillMode fillMode, bool geometryShader)
         {
+            geom = geometryShader;
             //Shaders
             using (var b = ShaderBytecode.CompileFromFile("Shaders\\" + name + "Shader.fx", "vs", "vs_4_0", ShaderFlags.None, EffectFlags.None))
             {
@@ -276,11 +277,13 @@ namespace SMEditor
             {
                 PS = new PixelShader(Renderer.viewport.Device, b);
             }
-            using (var b = ShaderBytecode.CompileFromFile("Shaders\\" + name + "Shader.fx", "gs", "gs_4_0", ShaderFlags.None, EffectFlags.None))
+            if (geometryShader)
             {
-                GS_Tri = new GeometryShader(Renderer.viewport.Device, b);
+                using (var b = ShaderBytecode.CompileFromFile("Shaders\\" + name + "Shader.fx", "gs", "gs_4_0", ShaderFlags.None, EffectFlags.None))
+                {
+                    GS_Tri = new GeometryShader(Renderer.viewport.Device, b);
+                }
             }
-
             //InputLayout
             Inpl = new InputLayout(Renderer.viewport.Device, Sig, inplElems);
 
@@ -299,7 +302,8 @@ namespace SMEditor
             Renderer.viewport.Device.ImmediateContext.Rasterizer.State = RS;
             Renderer.viewport.Device.ImmediateContext.VertexShader.Set(VS);
             Renderer.viewport.Device.ImmediateContext.PixelShader.Set(PS);
-            Renderer.viewport.Device.ImmediateContext.GeometryShader.Set(GS_Tri);
+            if (geom) Renderer.viewport.Device.ImmediateContext.GeometryShader.Set(GS_Tri);
+            else Renderer.viewport.Device.ImmediateContext.GeometryShader.Set(null);
             Renderer.viewport.Device.ImmediateContext.InputAssembler.InputLayout = Inpl;
         }
 

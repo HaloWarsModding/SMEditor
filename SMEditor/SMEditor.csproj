@@ -43,15 +43,6 @@
     <Reference Include="BepuUtilities, Version=2.2.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\BepuUtilities.2.2.0\lib\netstandard2.0\BepuUtilities.dll</HintPath>
     </Reference>
-    <Reference Include="Caliburn.Micro, Version=2.0.2.0, Culture=neutral, PublicKeyToken=8e5891231f2ed21f, processorArchitecture=MSIL">
-      <HintPath>..\packages\Caliburn.Micro.Core.2.0.2\lib\net45\Caliburn.Micro.dll</HintPath>
-    </Reference>
-    <Reference Include="Caliburn.Micro.Platform, Version=2.0.2.0, Culture=neutral, PublicKeyToken=8e5891231f2ed21f, processorArchitecture=MSIL">
-      <HintPath>..\packages\Caliburn.Micro.2.0.2\lib\net45\Caliburn.Micro.Platform.dll</HintPath>
-    </Reference>
-    <Reference Include="ColorSlider">
-      <HintPath>..\..\..\..\Desktop\ColorSlider\ColorSlider\bin\Release\ColorSlider.dll</HintPath>
-    </Reference>
     <Reference Include="EnvDTE, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
@@ -152,7 +143,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Editor\3dCursor.cs" />
-    <Compile Include="Editor\Scenario\HWDEScenarioData.cs" />
+    <Compile Include="Editor\Scenario\HWDEScenario.cs" />
     <Compile Include="Editor\Layout\DockableWindow.cs" />
     <Compile Include="Editor\Layout\OutputPanel.cs" />
     <Compile Include="Editor\Layout\PropertiesPanel.cs" />
@@ -162,7 +153,7 @@
     <Compile Include="Editor\Tools\Tool.cs" />
     <Compile Include="Editor\Editor.cs" />
     <Compile Include="Editor\Editables\Grid.cs" />
-    <Compile Include="Editor\Editables\Terrain.cs" />
+    <Compile Include="Editor\Scenario\Terrain\Terrain.cs" />
     <Compile Include="MainWindow\IUpdateable.cs" />
     <Compile Include="Editor\Input.cs" />
     <Compile Include="MainWindow\Layout.cs" />
@@ -217,9 +208,7 @@
     <Content Include="Resources\Shaders\cursorShader.fx" />
     <Content Include="Resources\Shaders\terrainShader.fx" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Editor\Scenario\Texturing\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>ECHO ON

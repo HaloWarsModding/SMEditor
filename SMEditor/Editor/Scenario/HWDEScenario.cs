@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 namespace SMEditor.Editor
 {
     public enum HWDEScenarioSize { small512, small768, medium1024, medium1536, large2048 }
-    public class HWDEScenarioData
+    public class HWDEScenario
     {
         private HWDEScenarioSize size;
         private int numXChunks = 0;
 
         public Terrain terrain;
 
-        public HWDEScenarioData(HWDEScenarioSize _size)
+        public HWDEScenario(HWDEScenarioSize _size)
         {
             size = _size;
             switch(_size)

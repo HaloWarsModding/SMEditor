@@ -9,6 +9,7 @@ using g3;
 using SMEditor.Editor.Tools;
 using SMEditor;
 using SMEditor.Editor.Layout;
+using SlimDX.Direct3D11;
 
 namespace SMEditor.Editor
 {
@@ -23,11 +24,11 @@ namespace SMEditor.Editor
         }
 
         //Scenario
-        public static HWDEScenarioData scenario;
+        public static HWDEScenario scenario;
         public static void LoadNewProject(HWDEScenarioSize s)
         {
             if (projectLoaded) UnloadProject();
-            scenario = new HWDEScenarioData(s);
+            scenario = new HWDEScenario(s);
             projectLoaded = true;
         }
         public static void UnloadProject()
@@ -90,7 +91,7 @@ namespace SMEditor.Editor
             outputPanel.Init();
         }
         public static void PostUILoad()
-        {            
+        {
             //init static systems
             Renderer.Init();
             Input.Init();
