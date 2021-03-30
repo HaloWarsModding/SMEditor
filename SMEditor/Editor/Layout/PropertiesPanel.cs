@@ -2,6 +2,7 @@
 using Syncfusion.Windows.Forms.Tools;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,11 +17,13 @@ namespace SMEditor.Editor.Layout
         int tempFloat1 = 10, tempFloat2 = 100;
 
         TableLayoutPanel tlp;
+        PropertyGrid pg;
         SplitContainer header;
         PictureBox selectedTypeImage;
         Label selectedTypeText;
         public PropertiesPanel(bool showOnDefault) : base("Properties", showOnDefault)
         {
+
             tlp = new TableLayoutPanel();
             tlp.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
             tlp.BackColor = System.Drawing.Color.Beige;
@@ -34,9 +37,12 @@ namespace SMEditor.Editor.Layout
             header.Panel2.BackColor = System.Drawing.Color.Beige;
 
             ClearProperties();
+            Program.mainWindow.dockingManager.SetControlMinimumSize(p, new Size(250, 0));
+            Program.mainWindow.dockingManager.SetControlSize(p, new Size(260, 0));
         }
         public override void Init()
         {
+
             p.Controls.Add(tlp);
             p.Controls.Add(header);
 
@@ -73,6 +79,27 @@ namespace SMEditor.Editor.Layout
                 new SliderProperty("TEST2", tempFloat2, 0, 200)
             });
         }
+        public override void Resize()
+        {
+            // this is just so that all of the properties' controls' update visually upon resize.
+            tlp.Invalidate();
+            foreach(Control c in tlp.Controls)
+            {
+                c.Invalidate();
+                foreach (Control c2 in c.Controls)
+                {
+                    c2.Invalidate();
+                    foreach (Control c3 in c2.Controls)
+                    {
+                        c3.Invalidate();
+                        foreach(Control c4 in c3.Controls)
+                        {
+                            c4.Invalidate();
+                        }
+                    }
+                }
+            }
+        }
         public void SetProperties(SelectedType selectedType, string selectedName, PropertyField[] pfs)
         {
             ClearProperties();
@@ -84,9 +111,9 @@ namespace SMEditor.Editor.Layout
             selectedTypeText.Text = selectedName;
 
             // add properties
+            int height = 0;
             foreach (PropertyField f in pfs)
             {
-                tlp.RowStyles.Add(new RowStyle(SizeType.Absolute, 22));
                 tlp.RowCount++;
 
                 // property name
@@ -94,15 +121,25 @@ namespace SMEditor.Editor.Layout
                 label.Text = f.name;
                 label.Margin = new Padding(1, 4, 0, 0);
                 tlp.Controls.Add(label);
-
+                
+                // specific types
                 if (f.type == PropertyField.Type.SliderProperty)
                 {
                     SliderProperty sp = (SliderProperty)f;
                     tlp.Controls.Add(sp.sc);
+                    tlp.RowStyles.Add(new RowStyle(SizeType.Absolute, 22));
+                    height += 23;
+                }
+                if (f.type == PropertyField.Type.EnumProperty)
+                {
+                    EnumProperty ep = (EnumProperty)f;
+                    tlp.Controls.Add(ep.sc);
+                    tlp.RowStyles.Add(new RowStyle(SizeType.Absolute, 22));
+                    height += 23;
                 }
             }
 
-            tlp.Height = pfs.Length * 23 + 1;
+            tlp.Height = height + 1;
         }
         public void ClearProperties()
         {
@@ -117,7 +154,7 @@ namespace SMEditor.Editor.Layout
 
     public class PropertyField
     {
-        public enum Type { SliderProperty }
+        public enum Type { SliderProperty, EnumProperty }
         public Type type;
         public string name;
     }
@@ -159,6 +196,7 @@ namespace SMEditor.Editor.Layout
             tb.Maximum = max;
             tb.Value = value;
             tb.AutoSize = false;
+            //tb.BackColor = Color.FromArgb(45, 45, 48);
             tb.SliderSize = new System.Drawing.Size(tb.SliderSize.Width+5, tb.SliderSize.Height);
             tb.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
 
@@ -196,5 +234,42 @@ namespace SMEditor.Editor.Layout
         }
 
         public float GetValue() { return tb.Value / divideBy; }
+    }
+    public class EnumProperty : PropertyField
+    {
+        public SplitContainer sc;
+        public ComboBox cb;
+        public EnumProperty(string _name, string[] options, int defaultOptionIndex)
+        {
+            type = Type.EnumProperty;
+            name = _name;
+
+            sc = new SplitContainer();
+            sc.SplitterDistance = 1000;
+            sc.Panel2Collapsed = true;
+            sc.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
+            sc.BorderStyle = BorderStyle.FixedSingle;
+
+            cb = new ComboBox();
+            cb.Height = 20;
+            cb.Location = new System.Drawing.Point(-2, -4);
+            cb.DropDownStyle = ComboBoxStyle.DropDownList;
+            cb.FlatStyle = FlatStyle.Flat;
+            cb.Width = sc.Width + 3;
+            cb.BackColor = Color.FromArgb(241, 241, 241);
+            //cb.st
+            cb.Font = new System.Drawing.Font(cb.Font.FontFamily, 7.5f);
+            cb.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
+
+            sc.Panel1.Controls.Add(cb);
+
+            foreach (string s in options)
+            {
+                cb.Items.Add(s);
+            }
+            cb.SelectedIndex = defaultOptionIndex;
+        }
+        public string GetActiveName() { return cb.SelectedText; }
+        public int GetActiveIndex() { return cb.SelectedIndex; }
     }
 }

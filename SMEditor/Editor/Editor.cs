@@ -10,6 +10,7 @@ using SMEditor.Editor.Tools;
 using SMEditor;
 using SMEditor.Editor.Layout;
 using SlimDX.Direct3D11;
+using SMEditor.Editor.Tools.TerrainTools;
 
 namespace SMEditor.Editor
 {
@@ -20,7 +21,7 @@ namespace SMEditor.Editor
         public static void ClearCursorState()
         {
             //Basically, deselect everything so that there is no issues with selecting something else.
-            foreach (Tool t in ToolDock.tools.Values) t.Disable();
+            foreach (TerrainTool t in TerrainToolDock.tools.Values) t.Disable();
         }
 
         //Scenario
@@ -77,7 +78,7 @@ namespace SMEditor.Editor
                 if (!loopCursorInBounds) mouseInBounds = false;
             }
 
-            ToolDock.UpdateAll();
+            TerrainToolDock.UpdateAll();
         }
         public static void PreUILoad()
         {            
@@ -95,7 +96,7 @@ namespace SMEditor.Editor
             //init static systems
             Renderer.Init();
             Input.Init();
-            ToolDock.Init();
+            TerrainToolDock.Init();
 
             //init world
             cursor = new _3dCursor();

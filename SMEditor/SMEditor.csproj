@@ -148,12 +148,13 @@
     <Compile Include="Editor\Layout\OutputPanel.cs" />
     <Compile Include="Editor\Layout\PropertiesPanel.cs" />
     <Compile Include="Editor\Layout\ViewportPanel.cs" />
-    <Compile Include="Editor\Tools\Plateau\Plateau.cs" />
-    <Compile Include="Editor\Tools\Terraformer\Terraformer.cs" />
-    <Compile Include="Editor\Tools\Tool.cs" />
+    <Compile Include="Editor\Tools\TerrainTools\Plateau.cs" />
+    <Compile Include="Editor\Tools\TerrainTools\Terraformer.cs" />
+    <Compile Include="Editor\Tools\TerrainTools\TerrainTool.cs" />
     <Compile Include="Editor\Editor.cs" />
     <Compile Include="Editor\Editables\Grid.cs" />
     <Compile Include="Editor\Scenario\Terrain\Terrain.cs" />
+    <Compile Include="Editor\Tools\TerrainTools\TexturePainter.cs" />
     <Compile Include="MainWindow\IUpdateable.cs" />
     <Compile Include="Editor\Input.cs" />
     <Compile Include="MainWindow\Layout.cs" />

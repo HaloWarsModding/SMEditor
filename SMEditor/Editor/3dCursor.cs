@@ -111,4 +111,9 @@ new BasicVertex(new Vector3(0.319846F, 5.531382F, 0.073004F), new Vector3(0, 0, 
             cursor.Draw();
         }
     }
+
+    public class CursorSphere
+    {
+
+    }
 }

@@ -19,10 +19,10 @@ using System.Windows.Media.Imaging;
 using System.IO;
 using Pfim;
 using System.Drawing.Imaging;
+using static SMEditor.Editor.Terrain;
 
 namespace SMEditor.Editor
 {
-
     public class TerrainChunk
     {
         public const int numXVerts = 64;
@@ -31,7 +31,7 @@ namespace SMEditor.Editor
         public DMesh3 dMesh;
         public DMeshAABBTree3 dMeshAABB;
 
-        //Ctor
+        // Ctor
         public TerrainChunk(int _arrX, int _arrY, int terrainSize)
         {
             //this can be done here because it wont ever need to be modified.
@@ -56,8 +56,9 @@ namespace SMEditor.Editor
 
                     //fancy uv stuff.
                     float uvu, uvv;
-                    uvu = ((1f / numXVerts) * i);
-                    uvv = 1 - ((1f / numXVerts) * j);
+                    uvu = ((1f / (numXVerts-1)) * i);
+                    uvv = 1 - ((1f / (numXVerts-1)) * j);
+                    
 
                     Vertex vert = new Vertex()
                     {
@@ -116,7 +117,7 @@ namespace SMEditor.Editor
             InitRendering(inds);
         }
 
-        //Rendering
+        // Rendering
         BufferDescription vbd, ibd;
         public int indexCount = 0;
         public Buffer vb;
@@ -172,15 +173,14 @@ namespace SMEditor.Editor
             });
 
             //init the first alpha layer to be fully opaque.
-            for (int i = 0; i < numXVerts * numXVerts * 16; i+=16)
+            for (int i = 0; i < numXVerts * numXVerts * 16; i++)
             {
-                alphas[i + 0] = 100;
-                alphas[i + 1] = 23;
-                alphas[i + 2] = 255;
+                alphas[i] = 0;
+                if (i % 16 == 0) alphas[i] = 255;
             }
 
             //init the buffer for the first time.
-            UpdateSplatGPUBuffer();
+            UpdatePaint();
         }
         public void Draw()
         {
@@ -200,11 +200,16 @@ namespace SMEditor.Editor
             Renderer.viewport.Device.ImmediateContext.DrawIndexed(indexCount, 0, 0);
         }
         //
-        //Splatting
-        private byte[] alphas = new byte[numXVerts * numXVerts * 16];
+        // Splatting
         Buffer splatBuffer;
+        private byte[] alphas = new byte[numXVerts * numXVerts * 16];
+        public void SetAlpha(int vertIndex, TextureIndex textureIndex, byte opacity)
+        {
+            int index = vertIndex * 16  + (int)textureIndex;
+            alphas[index] = opacity;
+        }
 
-        //Updates
+        // Updates
         public void UpdateVisual()
         {
             DataStream vd = new DataStream(GetBlittableVertexData(), true, true);
@@ -212,13 +217,6 @@ namespace SMEditor.Editor
 
             Renderer.viewport.Context.UpdateSubresource(new DataBox(0, 0, vd), vb, 0);
             vd.Dispose();
-        }
-        private void UpdateSplatGPUBuffer()
-        {
-            var db0 = new DataStream(alphas, true, true);
-            Renderer.viewport.Context.UpdateSubresource(new DataBox(0, 0, db0), splatBuffer, 0);
-            db0.Position = 0;
-            db0.Dispose();
         }
         public void UpdateCollision()
         {
@@ -232,9 +230,16 @@ namespace SMEditor.Editor
             }
             dMeshAABB.Build();
         }
+        public void UpdatePaint()
+        {
+            var db0 = new DataStream(alphas, true, true);
+            Renderer.viewport.Context.UpdateSubresource(new DataBox(0, 0, db0), splatBuffer, 0);
+            db0.Position = 0;
+            db0.Dispose();
+        }
 
 
-        //Because C# is dumb:
+        // Because C# is dumb:
         [StructLayout(LayoutKind.Sequential, Pack = 4, Size = 36)]
         public struct VertexBlitable
         {
@@ -266,7 +271,6 @@ namespace SMEditor.Editor
 
 
 
-
     public class Terrain
     {
         public int chunksPerAxis;
@@ -277,34 +281,102 @@ namespace SMEditor.Editor
                 new InputElement("NORMAL_IN", 0, Format.R32G32B32_Float, 20, 0),
                 new InputElement("INDEX_IN", 0, Format.R32_SInt, 32, 0)
             }, false);
-        public TerrainChunk[,] terrainChunks;
-        private bool[,] terrainChunkNeedsAABBUpdate;
-        private bool[,] terrainChunkNeedsVisualUpdate;
-        public TerrainTexture texture;
+        private TerrainChunk[,] terrainChunks;
 
-        //Ctor
+        private class TerrainChunkStatus
+        {
+            public bool needsAABBUpdate = false;
+            public bool needsVisualUpdate = false;
+            public bool needsPaintUpdate = false;
+        }
+        TerrainChunkStatus[,] chunkStatus;
+
+        public enum TextureIndex { Tex0, Tex1, Tex2, Tex3, Tex4, Tex5, Tex6, Tex7, Tex8, Tex9, Tex10, Tex11, Tex12, Tex13, Tex14, Tex15, }
+        Texture2D texArray;
+        DataRectangle[] textureData = new DataRectangle[16];
+        int[] layerOrderMapping = new int[16];
+
+
+        // Ctor
         public Terrain(int _chunksPerAxis)
         {
             chunksPerAxis = _chunksPerAxis;
             terrainChunks = new TerrainChunk[_chunksPerAxis, _chunksPerAxis];
-            terrainChunkNeedsAABBUpdate = new bool[_chunksPerAxis, _chunksPerAxis];
-            terrainChunkNeedsVisualUpdate = new bool[_chunksPerAxis, _chunksPerAxis];
+            chunkStatus = new TerrainChunkStatus[_chunksPerAxis, _chunksPerAxis];
             for (int x = 0; x < _chunksPerAxis; x++)
             {
                 for (int y = 0; y < _chunksPerAxis; y++)
                 {
                     terrainChunks[x, y] = new TerrainChunk(x, y, _chunksPerAxis);
-                    terrainChunkNeedsAABBUpdate[x, y] = false;
-                    terrainChunkNeedsVisualUpdate[x, y] = false;
+                    chunkStatus[x, y] = new TerrainChunkStatus();
                 }
             }
 
-            texture = new TerrainTexture();
+            for (int i = 0; i < 16; i++)
+            {
+                textureData[i] = new DataRectangle(1024 * 4, new DataStream(1024 * 4 * 1024, true, true));
+            }
+
+            LoadTextureIntoSlot(0, @"C:\Program Files (x86)\Steam\steamapps\common\HaloWarsDE\Extract\art\terrain\harvest\snowtrail_01_df.ddx.dds");
+            LoadTextureIntoSlot(1, @"C:\Program Files (x86)\Steam\steamapps\common\HaloWarsDE\Extract\art\terrain\harvest\glassing_02_df.ddx.dds");
         }
-        
-        //Gets
+        // Rendering
+        public void Draw()
+        {
+            foreach (TerrainChunk t in terrainChunks)
+            {
+                t.Draw();
+            }
+        }
+        // Updates
+        public void UpdateRequiredVisuals()
+        {
+            for (int x = 0; x < chunksPerAxis; x++)
+            {
+                for (int y = 0; y < chunksPerAxis; y++)
+                {
+                    if (chunkStatus[x, y].needsVisualUpdate)
+                    {
+                        terrainChunks[x, y].UpdateVisual();
+                        chunkStatus[x, y].needsVisualUpdate = false;
+                    }
+                }
+            }
+        }
+        public void UpdateRequiredCollisionModels()
+        {
+            for (int x = 0; x < chunksPerAxis; x++)
+            {
+                for (int y = 0; y < chunksPerAxis; y++)
+                {
+                    if (chunkStatus[x, y].needsAABBUpdate)
+                    {
+                        terrainChunks[x, y].UpdateCollision();
+                        chunkStatus[x, y].needsAABBUpdate = false;
+                    }
+                }
+            }
+        }
+        public void UpdateRequiredPaints()
+        {
+            for (int x = 0; x < chunksPerAxis; x++)
+            {
+                for (int y = 0; y < chunksPerAxis; y++)
+                {
+                    if (chunkStatus[x, y].needsPaintUpdate)
+                    {
+                        terrainChunks[x, y].UpdatePaint();
+                        chunkStatus[x, y].needsPaintUpdate = false;
+                    }
+                }
+            }
+        }
+
+
+        // Gets
         public class TerrainIndexMapping { public int index, x, y; public TerrainIndexMapping(int _i, int _x, int _y) { index = _i; x = _x; y = _y; } }
-        public List<TerrainIndexMapping> GetVertsInRadius(Vector3 position, double radius)
+        public enum RadiusMode { Sphere, Cyllinder }
+        public List<TerrainIndexMapping> GetVertsInRadius(Vector3 position, double radius, RadiusMode r = RadiusMode.Cyllinder)
         {
             List<TerrainIndexMapping> tim = new List<TerrainIndexMapping>();
 
@@ -318,7 +390,13 @@ namespace SMEditor.Editor
                 {
                     foreach (int v in t.dMesh.VertexIndices())
                     {
-                        if (Vector3.Distance(Convert.ToV3(t.dMesh.GetVertex(v)), position) <= radius)
+                        Vector3 vert = Convert.ToV3(t.dMesh.GetVertex(v));
+
+                        //if cyllinder is selected, set the y position of the vertex we are scanning to be the same as the tested position's.
+                        //this basically makes the scan be done in 2D.
+                        if (r == RadiusMode.Cyllinder) vert.Y = position.Y; 
+
+                        if (Vector3.Distance(vert, position) <= radius)
                         {
                             tim.Add(new TerrainIndexMapping(v, t.arrayX, t.arrayY));
                         }
@@ -326,37 +404,6 @@ namespace SMEditor.Editor
                 }
             }
             return tim;
-            #region old
-            //List<int> verts = new List<int>();
-
-            //int halfRad = (int)Math.Round(rad / 2F) + 1;
-
-            ////get all verts in radius
-            //for (int x = 0; x < halfRad * 2; x++) 
-            //{
-            //    for (int y = 0; y < halfRad * 2; y++)
-            //    {
-            //        verts.Add(vID + x + ((size + 1) * y));
-            //        verts.Add(vID - x + ((size + 1) * y));
-
-            //        verts.Add(vID + x + ((size + 1) * -y));
-            //        verts.Add(vID - x + ((size + 1) * -y));
-            //    }
-            //}
-
-            //List<int> finalVerts = new List<int>();
-            ////clean verts for any out-of-bounds entries, or verts that are outside the radius.
-            //foreach(int i in verts)
-            //{
-            //    if (i >= 0 && i <= size * size && Vector3.Distance(vertices[i].position, vertices[vID].position) < rad)
-            //    {
-            //        finalVerts.Add(i);
-            //    }
-            //}
-
-            ////use Distinct() to remove duplicates, just in case.
-            //return finalVerts.Distinct().ToList();
-            #endregion
         }
         public Vector3d GetHitLocationFromRay(Ray3d ray)
         {
@@ -386,7 +433,7 @@ namespace SMEditor.Editor
             return vout;
         }
 
-        //Edits
+        // Edit Terrain Shape
         public enum EditMode { Add, Set }
         public void EditVertexHeight(TerrainIndexMapping map, float height, EditMode mode)
         {
@@ -397,69 +444,15 @@ namespace SMEditor.Editor
             terrainChunks[map.x, map.y].vertices[map.index].y = y;
             terrainChunks[map.x, map.y].vertNeedsCollisionUpdate[map.index] = true;
 
-            terrainChunkNeedsVisualUpdate[map.x, map.y] = true;
-            terrainChunkNeedsAABBUpdate[map.x, map.y] = true;
+            chunkStatus[map.x, map.y].needsVisualUpdate = true;
+            chunkStatus[map.x, map.y].needsAABBUpdate = true;
         }
 
-        //Updates
-        public void UpdateVisual()
+        // Edit Terrain Paint
+        public void Paint(TerrainIndexMapping i, TextureIndex ti, byte opacity)
         {
-            for (int x = 0; x < chunksPerAxis; x++)
-            {
-                for (int y = 0; y < chunksPerAxis; y++)
-                {
-                    if (terrainChunkNeedsVisualUpdate[x, y])
-                    {
-                        terrainChunks[x, y].UpdateVisual();
-                        terrainChunkNeedsVisualUpdate[x, y] = false;
-                    }
-                }
-            }
-        }
-        public void UpdateCollisionModel()
-        {
-            for (int x = 0; x < chunksPerAxis; x++)
-            {
-                for (int y = 0; y < chunksPerAxis; y++)
-                {
-                    if (terrainChunkNeedsAABBUpdate[x, y])
-                    {
-                        terrainChunks[x, y].UpdateCollision();
-                        terrainChunkNeedsAABBUpdate[x, y] = false;
-                    }
-                }
-            }
-        }
-
-        //Rendering
-        public void Draw()
-        {
-            foreach (TerrainChunk t in terrainChunks)
-            {
-                t.Draw();
-            }
-        }
-
-        //Dtor
-        public void Dispose()
-        {
-        }
-    };
-
-    public class TerrainTexture
-    {
-        Texture2D texArray;
-        DataRectangle[] textureData = new DataRectangle[16];
-        int[] layerOrderMapping = new int[16];
-        public TerrainTexture()
-        {
-            for(int i = 0; i < 16; i++)
-            {
-                textureData[i] = new DataRectangle(1024 * 4, new DataStream(1024 * 4 * 1024, true, true));
-            }
-
-            LoadTextureIntoSlot(0, @"C:\Program Files (x86)\Steam\steamapps\common\HaloWarsDE\Extract\art\terrain\harvest\snowtrail_01_df.ddx.dds");
-            LoadTextureIntoSlot(1, @"C:\Program Files (x86)\Steam\steamapps\common\HaloWarsDE\Extract\art\terrain\harvest\glassing_02_df.ddx.dds");
+            terrainChunks[i.x, i.y].SetAlpha(i.index, ti, opacity);
+            chunkStatus[i.x, i.y].needsPaintUpdate = true;
         }
 
         public void LoadTextureIntoSlot(int slot, string path)
@@ -498,5 +491,11 @@ namespace SMEditor.Editor
             if (img.Width != 1024 || img.Height != 1024) throw new Exception("Terrain textures must be 1024x1024px.");
             return new DataStream(img.Data, true, true);
         }
-    }
+
+
+        // Dtor
+        public void Dispose()
+        {
+        }
+    };
 }

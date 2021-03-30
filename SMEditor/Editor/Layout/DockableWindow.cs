@@ -19,6 +19,7 @@ namespace SMEditor.Editor
             //init
             tsmi = new ToolStripMenuItem();
             p = new Panel();
+            p.Resize += new EventHandler(Resized_Internal);
 
             if(!hideOnDefault) Program.mainWindow.dockingManager.SetEnableDocking(p, true);
 
@@ -34,11 +35,18 @@ namespace SMEditor.Editor
             tsmi.Name = name + "_menuItem";
             tsmi.Checked = !hideOnDefault;
             Program.mainWindow.windowToolStripMenuItem.DropDownItems.Add(tsmi);
-        }
-        public virtual void Init()
-        {
 
+            init = true;
         }
+
+        bool init = false;
+        private void Resized_Internal(object sender, EventArgs e)
+        {
+            if (init)Resize();
+        }
+
+        public virtual void Resize() { }
+        public virtual void Init() { }
 
         private void TSMICheckChanged(object sender, EventArgs e)
         {

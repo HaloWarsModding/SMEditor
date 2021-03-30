@@ -29,7 +29,7 @@ namespace SMEditor
             Editor.Editor.PreUILoad();
 
             //TODO: Replace this with a proper layout manager.
-            dockingManager.DockControl(Editor.Editor.viewportPanel.p, this, DockingStyle.Right, 700);
+            dockingManager.DockControl(Editor.Editor.viewportPanel.p, this, DockingStyle.Right, 675);
             dockingManager.EnableContextMenu = false;
         }
         private void POSTLOAD()

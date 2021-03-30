@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 using g3;
 using SMEditor.Editor.Layout;
 
-namespace SMEditor.Editor.Tools
+namespace SMEditor.Editor.Tools.TerrainTools
 {
-    public class Terraformer : Tool
+    public class Terraformer : TerrainTool
     {
         public Terraformer() : base("Terraformer") { }
 
@@ -19,7 +19,7 @@ namespace SMEditor.Editor.Tools
         {
             base.Enable();
             Editor.propertiesPanel.SetProperties(SelectedType.Tool, "Terraformer", 
-                new PropertyField[2] { radius, intensity });
+                new PropertyField[] { radius, intensity });
         }
         public override void Disable()
         {
@@ -41,7 +41,7 @@ namespace SMEditor.Editor.Tools
                     Editor.scenario.terrain.EditVertexHeight(tim, .10f, Terrain.EditMode.Add);
                 }
 
-                Editor.scenario.terrain.UpdateVisual();
+                Editor.scenario.terrain.UpdateRequiredVisuals();
                 collisionMeshUpdateNeeded = true;
             }
             if (Input.RMBPressed)
@@ -54,7 +54,7 @@ namespace SMEditor.Editor.Tools
                     //    Editor.scenario.terrain.EditVertexHeight(i, -.10F, Terrain.EditMode.Add);
                     //}
                     
-                    Editor.scenario.terrain.UpdateVisual();
+                    Editor.scenario.terrain.UpdateRequiredVisuals();
                     collisionMeshUpdateNeeded = true;
                 }
             }
@@ -63,7 +63,7 @@ namespace SMEditor.Editor.Tools
             if (released && collisionMeshUpdateNeeded)
             {
                 collisionMeshUpdateNeeded = false;
-                Editor.scenario.terrain.UpdateCollisionModel();
+                Editor.scenario.terrain.UpdateRequiredCollisionModels();
             }
         }
     }

@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SMEditor.Editor.Tools
+namespace SMEditor.Editor.Tools.TerrainTools
 {
-    class Plateau : Tool
+    class Plateau : TerrainTool
     {
         SliderProperty radius = new SliderProperty("Radius", 12, 0, 50);
         SliderProperty height = new SliderProperty("Height", 0, -999, 999, DecimalPlaceCount.Single);
@@ -30,7 +30,7 @@ namespace SMEditor.Editor.Tools
                     //    Editor.scenario.terrain.EditVertexHeight(i, height.GetValue(), Terrain.EditMode.Set);
                     //}
 
-                    Editor.scenario.terrain.UpdateVisual();
+                    Editor.scenario.terrain.UpdateRequiredVisuals();
                     collisionMeshUpdateNeeded = true;
                 }
             }
@@ -44,7 +44,7 @@ namespace SMEditor.Editor.Tools
                     //    Editor.scenario.terrain.EditVertexHeight(i, 0, Terrain.EditMode.Set);
                     //}
 
-                    Editor.scenario.terrain.UpdateVisual();
+                    Editor.scenario.terrain.UpdateRequiredVisuals();
                     collisionMeshUpdateNeeded = true;
                 }
             }
@@ -53,7 +53,7 @@ namespace SMEditor.Editor.Tools
             if (released && collisionMeshUpdateNeeded)
             {
                 collisionMeshUpdateNeeded = false;
-                Editor.scenario.terrain.UpdateCollisionModel();
+                Editor.scenario.terrain.UpdateRequiredCollisionModels();
             }
         }
         public override void Enable()

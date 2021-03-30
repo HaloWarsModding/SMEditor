@@ -13,67 +13,71 @@ class Program
     static void Main(string[] args)
     {
         //AAA();
-
+        //GainSphere();
         TextureTest();
 
-        //byte[] xtd = File.ReadAllBytes(@"C:\Program Files (x86)\Steam\steamapps\common\HaloWarsDE\StumpyHWDEMod\SMEditorTests\scenario\skirmish\design\chasms\chasms_clean.xtd");
-        //for (int i = 0; i < 589824; i++)
-        //{
-        //    int offset = i * 4;
+       
+    }
+    static void Float3PK101010()
+    {
+        byte[] xtd = File.ReadAllBytes(@"C:\Program Files (x86)\Steam\steamapps\common\HaloWarsDE\StumpyHWDEMod\SMEditorTests\scenario\skirmish\design\chasms\chasms_clean.xtd");
+        for (int i = 0; i < 589824; i++)
+        {
+            int offset = i * 4;
 
-        //    uint uix = BitConverter.ToUInt32(xtd, 9464 + offset) >> 20;
-        //    uint uiy = BitConverter.ToUInt32(xtd, 9464 + offset) >> 10;
-        //    uint uiz = BitConverter.ToUInt32(xtd, 9464 + offset) >> 0;
+            uint uix = BitConverter.ToUInt32(xtd, 9464 + offset) >> 20;
+            uint uiy = BitConverter.ToUInt32(xtd, 9464 + offset) >> 10;
+            uint uiz = BitConverter.ToUInt32(xtd, 9464 + offset) >> 0;
 
-        //    uint kBitMask10 = (1 << 10) - 1;
-        //    float kBitMask10Rcp = 1.0f / kBitMask10;
+            uint kBitMask10 = (1 << 10) - 1;
+            float kBitMask10Rcp = 1.0f / kBitMask10;
 
-        //    uint xqq = uix & kBitMask10;
-        //    float fxqq = xqq * kBitMask10Rcp;
-        //    uint yqq = uiy & kBitMask10;
-        //    float fyqq = yqq * kBitMask10Rcp;
-        //    uint zqq = uiz & kBitMask10;
-        //    float fzqq = zqq * kBitMask10Rcp;
+            uint xqq = uix & kBitMask10;
+            float fxqq = xqq * kBitMask10Rcp;
+            uint yqq = uiy & kBitMask10;
+            float fyqq = yqq * kBitMask10Rcp;
+            uint zqq = uiz & kBitMask10;
+            float fzqq = zqq * kBitMask10Rcp;
 
-        //    //Console.WriteLine();
-        //    //Console.WriteLine(vy.X);
-        //    //Console.WriteLine(vy.Y);
-        //    //Console.WriteLine(vy.Z);
+            //Console.WriteLine();
+            //Console.WriteLine(vy.X);
+            //Console.WriteLine(vy.Y);
+            //Console.WriteLine(vy.Z);
 
-        //    //Console.WriteLine();
-        //    //Console.WriteLine(vz.X);
-        //    //Console.WriteLine(vz.Y);
-        //    //Console.WriteLine(vz.Z);
+            //Console.WriteLine();
+            //Console.WriteLine(vz.X);
+            //Console.WriteLine(vz.Y);
+            //Console.WriteLine(vz.Z);
 
-        //    ////float rex = -0.01349051f;
+            ////float rex = -0.01349051f;
 
-        //    ////rex += 46;
-        //    ////rex /= 96.6f;
-        //    ////rex /= kBitMask10Rcp;
-        //    ////Console.WriteLine(x + " " + rex);
+            ////rex += 46;
+            ////rex /= 96.6f;
+            ////rex /= kBitMask10Rcp;
+            ////Console.WriteLine(x + " " + rex);
 
-        //    float fx = 0.4760508f;
-        //    float fy = 0.518084f;
-        //    float fz = 0.4760508f;
+            float fx = 0.4760508f;
+            float fy = 0.518084f;
+            float fz = 0.4760508f;
 
-        //    //MAGIC SAUCE RIGHT HERE!
-        //    //Multipy, then AND with 1023, then bitshift into position.
-        //    uint newi = 0;
-        //    newi |= ((uint)(fxqq * 1023) & 1023) << 20;
-        //    newi |= ((uint)(fyqq * 1023) & 1023) << 10;
-        //    newi |= ((uint)(fzqq * 1023) & 1023) << 0;
+            //MAGIC SAUCE RIGHT HERE!
+            //Multipy, then AND with 1023, then bitshift into position.
+            uint newi = 0;
+            newi |= ((uint)(fxqq * 1023) & 1023) << 20;
+            newi |= ((uint)(fyqq * 1023) & 1023) << 10;
+            newi |= ((uint)(fzqq * 1023) & 1023) << 0;
 
-        //    //Console.WriteLine(uiz);
-        //    //Console.WriteLine(newi);
+            //Console.WriteLine(uiz);
+            //Console.WriteLine(newi);
 
-        //    xtd[9464 + offset] = BitConverter.GetBytes(newi)[0];
-        //    xtd[9465 + offset] = BitConverter.GetBytes(newi)[1];
-        //    xtd[9466 + offset] = BitConverter.GetBytes(newi)[2];
-        //    xtd[9467 + offset] = BitConverter.GetBytes(newi)[3];
+            xtd[9464 + offset] = BitConverter.GetBytes(newi)[0];
+            xtd[9465 + offset] = BitConverter.GetBytes(newi)[1];
+            xtd[9466 + offset] = BitConverter.GetBytes(newi)[2];
+            xtd[9467 + offset] = BitConverter.GetBytes(newi)[3];
 
-        //    if (i % 10000 == 0) Console.WriteLine(i);
-        //}
-        //File.WriteAllBytes((@"C:\Program Files (x86)\Steam\steamapps\common\HaloWarsDE\StumpyHWDEMod\SMEditorTests\scenario\skirmish\design\chasms\chasms.xtd"), xtd);
+            if (i % 10000 == 0) Console.WriteLine(i);
+        }
+        File.WriteAllBytes((@"C:\Program Files (x86)\Steam\steamapps\common\HaloWarsDE\StumpyHWDEMod\SMEditorTests\scenario\skirmish\design\chasms\chasms.xtd"), xtd);
     }
     static void TextureTest()
     {
