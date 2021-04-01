@@ -25,8 +25,6 @@ namespace SMEditor.Editor.Tools.TerrainTools
             AddSeparator();
             AddLabel(" Texturing:");
             tools.Add("Texture Painter", new TexturePainter());
-
-            tools["Texture Painter"].button.PerformClick();
         }
 
         public static void UpdateAll()

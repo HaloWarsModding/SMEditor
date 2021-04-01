@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SlimDX;
+using SlimDX.Direct3D11;
 using g3;
+using Buffer = SlimDX.Direct3D11.Buffer;
 
 namespace SMEditor.Editor
 {
@@ -13,8 +15,10 @@ namespace SMEditor.Editor
         public enum Mode { YAligned, NonAligned }
         public Mode mode = Mode.YAligned;
         BasicMesh cursor;
+        BasicMesh sphere;
         public Transform t = new Transform();
         public bool hitInfoExists;
+        public Buffer cursorPosition;
 
         public _3dCursor()
         {
@@ -86,6 +90,15 @@ new BasicVertex(new Vector3(0.319846F, 5.531382F, 0.073004F), new Vector3(0, 0, 
 15, 17, 19,
 9, 21, 20,
             });
+
+            cursorPosition = new Buffer(Renderer.viewport.Device, new BufferDescription
+            {
+                Usage = ResourceUsage.Default,
+                SizeInBytes = sizeof(float) * 4,
+                BindFlags = BindFlags.ConstantBuffer
+            });
+
+            InitRadiusView();
         }
         public void UpdatePositionOnTerrain()
         {
@@ -100,6 +113,15 @@ new BasicVertex(new Vector3(0.319846F, 5.531382F, 0.073004F), new Vector3(0, 0, 
 
             Ray3d ray = new Ray3d(pos, dir);
             t.position = Convert.ToV3(Editor.scenario.terrain.GetHitLocationFromRay(ray));
+
+            DataStream d = new DataStream(16, true, true);
+            d.Write<float>(t.position.X);
+            d.Write<float>(t.position.Y);
+            d.Write<float>(t.position.Z);
+            d.Write<float>(0f);
+            d.Position = 0;
+            Renderer.viewport.Context.UpdateSubresource(new DataBox(0, 0, d), cursorPosition, 0);
+            d.Dispose();
         }
         public void Draw()
         {
@@ -110,10 +132,26 @@ new BasicVertex(new Vector3(0.319846F, 5.531382F, 0.073004F), new Vector3(0, 0, 
 
             cursor.Draw();
         }
+
+        //RenderPass radiusViewPass;
+        private void InitRadiusView()
+        {
+            //sphere = new BasicMesh();
+            //List<BasicVertex> verts = new List<BasicVertex>();
+            //for (int i = 0; i < CursorSphereData.vertData.Count(); i += 3)
+            //    verts.Add(new BasicVertex(new Vector3(CursorSphereData.vertData[i], CursorSphereData.vertData[i + 1], CursorSphereData.vertData[i + 2]), new Vector3(0, 0, 0), new Vector3(0, 0, 0)));
+            //sphere.Init(verts, CursorSphereData.indexData.ToList());
+
+            //radiusViewPass = new RenderPass("radview",
+            //    SlimDX.Direct3D11.FillMode.Solid,
+            //    new SlimDX.Direct3D11.InputElement[] { new SlimDX.Direct3D11.InputElement("POSITION_IN", 0, SlimDX.DXGI.Format.R32G32B32_Float, 0, 0) },
+            //    false);
+
+
+
+ 
+        }
     }
 
-    public class CursorSphere
-    {
 
-    }
 }

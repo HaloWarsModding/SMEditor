@@ -18,7 +18,7 @@ namespace SMEditor.Editor.Tools.TerrainTools
         public override void Enable()
         {
             base.Enable();
-            Editor.propertiesPanel.SetProperties(SelectedType.Tool, "Terraformer", 
+            Editor.propertiesPanel.AddProperty(SelectedType.Tool, "Terraformer", 
                 new PropertyField[] { radius, intensity });
         }
         public override void Disable()
@@ -36,7 +36,7 @@ namespace SMEditor.Editor.Tools.TerrainTools
             {
                 released = false;
 
-                foreach (Terrain.TerrainIndexMapping tim in Editor.scenario.terrain.GetVertsInRadius(Editor.cursor.t.position, radius.GetValue()))
+                foreach (Terrain.TerrainIndexMapping tim in Editor.scenario.terrain.GetVertsInBrush(Editor.cursor.t.position, radius.GetValue()))
                 {
                     Editor.scenario.terrain.EditVertexHeight(tim, .10f, Terrain.EditMode.Add);
                 }

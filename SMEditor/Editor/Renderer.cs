@@ -32,6 +32,62 @@ namespace SMEditor
             }));
         }
 
+        public static void Resize()
+        {
+
+        }
+        //static Texture2D depthTexture;
+        //public static ShaderResourceView depthSRV;
+        //public static void AA()
+        //{
+        //    depthTexture = new Texture2D(Renderer.viewport.Device, new Texture2DDescription()
+        //    {
+        //        Format = SlimDX.DXGI.Format.R24G8_Typeless,
+        //        ArraySize = 1,
+        //        MipLevels = 1,
+        //        BindFlags = BindFlags.DepthStencil | BindFlags.ShaderResource,
+        //        Width = Renderer.viewport.Width,
+        //        Height = Renderer.viewport.Height,
+        //        CpuAccessFlags = CpuAccessFlags.None,
+        //        OptionFlags = ResourceOptionFlags.None,
+        //        SampleDescription = new SlimDX.DXGI.SampleDescription(1, 0),
+        //        Usage = ResourceUsage.Default
+        //    });
+
+        //    depthSRV = new ShaderResourceView(Renderer.viewport.Device, depthTexture, new ShaderResourceViewDescription()
+        //    {
+        //        Format = SlimDX.DXGI.Format.R24_UNorm_X8_Typeless,
+        //        Dimension = ShaderResourceViewDimension.Texture2D,
+        //        MostDetailedMip = 0,
+        //        MipLevels = 1,
+        //        ArraySize = 1
+        //    });
+
+        //    DepthStencilView dsv = new DepthStencilView(Renderer.viewport.Device, depthTexture, new DepthStencilViewDescription()
+        //    {
+        //        Format = SlimDX.DXGI.Format.D24_UNorm_S8_UInt,
+        //        Dimension = DepthStencilViewDimension.Texture2D,
+        //        ArraySize = 0,
+        //        MipSlice = 0
+        //    });
+
+        //    DepthStencilStateDescription dsStateDesc = new DepthStencilStateDescription()
+        //    {
+        //        IsDepthEnabled = true,
+        //        DepthWriteMask = DepthWriteMask.All,
+        //        DepthComparison = Comparison.Less,
+        //        FrontFace = new DepthStencilOperationDescription() { Comparison = Comparison.Always, DepthFailOperation = StencilOperation.Increment, FailOperation = StencilOperation.Keep, PassOperation = StencilOperation.Keep },
+        //        BackFace = new DepthStencilOperationDescription() { Comparison = Comparison.Always, DepthFailOperation = StencilOperation.Decrement, PassOperation = StencilOperation.Keep, FailOperation = StencilOperation.Keep },
+        //        IsStencilEnabled = true,
+        //        StencilReadMask = 0xff,
+        //        StencilWriteMask = 0xff
+        //    };
+        //    DepthStencilState depthState = DepthStencilState.FromDescription(Renderer.viewport.Device, dsStateDesc);
+        //    Renderer.viewport.Device.ImmediateContext.OutputMerger.DepthStencilState = depthState;
+            
+        //    Renderer.viewport.Device.ImmediateContext.OutputMerger.SetTargets(dsv, viewport.renderTargetView);
+        //}
+
         public static Dictionary<string, RenderPass> passes = new Dictionary<string, RenderPass>();
         
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -40,15 +96,14 @@ namespace SMEditor
         public static void Draw() { Draw(null, null); }
         public static void Draw(object o, System.Windows.Forms.PaintEventArgs e)
         {
+            if (!Editor.Editor.projectLoaded) return;
+
             viewport.Clear(System.Drawing.Color.DarkGray);
             viewport.Device.ImmediateContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
 
             mainCamera.UpdateCameraBuffer();
             
-            if (Editor.Editor.projectLoaded) Editor.Editor.scenario.terrain.Draw();
-
-
-            passes["cursor"].Use();
+            Editor.Editor.scenario.terrain.Draw();
             Editor.Editor.cursor.Draw();
 
             viewport.Present();

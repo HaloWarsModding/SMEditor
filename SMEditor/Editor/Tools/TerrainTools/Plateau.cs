@@ -59,7 +59,7 @@ namespace SMEditor.Editor.Tools.TerrainTools
         public override void Enable()
         {
             base.Enable();
-            Editor.propertiesPanel.SetProperties(SelectedType.Tool, "Plateau", new PropertyField[2] { radius, height });
+            Editor.propertiesPanel.AddProperty(SelectedType.Tool, "Plateau", new PropertyField[2] { radius, height });
         }
         public override void Disable()
         {

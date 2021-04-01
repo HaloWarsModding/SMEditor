@@ -7,14 +7,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Pfim;
+using Assimp;
 
 class Program
 {
     static void Main(string[] args)
     {
-        //AAA();
-        //GainSphere();
-        TextureTest();
+        GainSphere();
 
        
     }
@@ -114,11 +113,33 @@ class Program
 
         //Console.ReadKey();
     }
-    static void AAA()
+    static void GainSphere()
     {
-        foreach (string p in Directory.GetFiles(@"C:\Program Files (x86)\Steam\steamapps\common\HaloWarsDE\Extract\art\terrain", "*", SearchOption.AllDirectories))
+        AssimpContext c = new AssimpContext();
+        Scene s = c.ImportFile(@"C:\Users\jaken\Desktop\sphere.obj");
+        string text = "";
+
+        foreach (Vector3D v in s.Meshes[0].Vertices)
         {
-            File.Move(p, p + ".dds");
+            //text += v.X.ToString() + "f, " + v.Y.ToString() + "f, " + v.Z.ToString() + "f,\n";
         }
+        for(int i = 0; i < s.Meshes[0].GetIndices().Count(); i+= 10)
+        {
+            text += s.Meshes[0].GetIndices()[i + 0].ToString() + ", ";
+            text += s.Meshes[0].GetIndices()[i + 1].ToString() + ", ";
+            text += s.Meshes[0].GetIndices()[i + 2].ToString() + ", ";
+            text += s.Meshes[0].GetIndices()[i + 3].ToString() + ", ";
+            text += s.Meshes[0].GetIndices()[i + 4].ToString() + ", ";
+            text += s.Meshes[0].GetIndices()[i + 5].ToString() + ", ";
+            text += s.Meshes[0].GetIndices()[i + 6].ToString() + ", ";
+            text += s.Meshes[0].GetIndices()[i + 7].ToString() + ", ";
+            text += s.Meshes[0].GetIndices()[i + 8].ToString() + ", ";
+            text += s.Meshes[0].GetIndices()[i + 9].ToString() + ",\n";
+        }
+
+
+
+
+        File.WriteAllText(@"C:\Users\jaken\Desktop\sphere.txt", text);
     }
 }

@@ -20,6 +20,7 @@ using System.IO;
 using Pfim;
 using System.Drawing.Imaging;
 using static SMEditor.Editor.Terrain;
+using SMEditor.Editor.Layout;
 
 namespace SMEditor.Editor
 {
@@ -184,11 +185,12 @@ namespace SMEditor.Editor
         }
         public void Draw()
         {
-            //apply shader
-            Terrain.renderPass.Use();
-            
-            //set splat buffer
+            //===per-chunk calls===
+
+            //set buffers
             Renderer.viewport.Device.ImmediateContext.PixelShader.SetConstantBuffer(splatBuffer, 1);
+            Renderer.viewport.Device.ImmediateContext.PixelShader.SetConstantBuffer(Editor.cursor.cursorPosition, 2);
+            Renderer.viewport.Device.ImmediateContext.PixelShader.SetConstantBuffer(Editor.scenario.terrain.brushSettingsBuffer, 3);
 
             //apply transform
             Renderer.mainCamera.SetModelMatrix(Matrix.Transformation(new Vector3(0, 0, 0),
@@ -289,26 +291,28 @@ namespace SMEditor.Editor
             public bool needsVisualUpdate = false;
             public bool needsPaintUpdate = false;
         }
-        TerrainChunkStatus[,] chunkStatus;
+        TerrainChunkStatus[,] chunkStatuses;
 
         public enum TextureIndex { Tex0, Tex1, Tex2, Tex3, Tex4, Tex5, Tex6, Tex7, Tex8, Tex9, Tex10, Tex11, Tex12, Tex13, Tex14, Tex15, }
         Texture2D texArray;
+        ShaderResourceView texArraySRV;
         DataRectangle[] textureData = new DataRectangle[16];
         int[] layerOrderMapping = new int[16];
 
+        public class TerrainIndexMapping { public int index, x, y; public TerrainIndexMapping(int _i, int _x, int _y) { index = _i; x = _x; y = _y; } }
 
-        // Ctor
+        // Ctor/Dtor
         public Terrain(int _chunksPerAxis)
         {
             chunksPerAxis = _chunksPerAxis;
             terrainChunks = new TerrainChunk[_chunksPerAxis, _chunksPerAxis];
-            chunkStatus = new TerrainChunkStatus[_chunksPerAxis, _chunksPerAxis];
+            chunkStatuses = new TerrainChunkStatus[_chunksPerAxis, _chunksPerAxis];
             for (int x = 0; x < _chunksPerAxis; x++)
             {
                 for (int y = 0; y < _chunksPerAxis; y++)
                 {
                     terrainChunks[x, y] = new TerrainChunk(x, y, _chunksPerAxis);
-                    chunkStatus[x, y] = new TerrainChunkStatus();
+                    chunkStatuses[x, y] = new TerrainChunkStatus();
                 }
             }
 
@@ -317,12 +321,36 @@ namespace SMEditor.Editor
                 textureData[i] = new DataRectangle(1024 * 4, new DataStream(1024 * 4 * 1024, true, true));
             }
 
+            brushSettingsBuffer = new Buffer(Renderer.viewport.Device, new BufferDescription(16, ResourceUsage.Default, BindFlags.ConstantBuffer, CpuAccessFlags.None, ResourceOptionFlags.None, 0));
+            
             LoadTextureIntoSlot(0, @"C:\Program Files (x86)\Steam\steamapps\common\HaloWarsDE\Extract\art\terrain\harvest\snowtrail_01_df.ddx.dds");
             LoadTextureIntoSlot(1, @"C:\Program Files (x86)\Steam\steamapps\common\HaloWarsDE\Extract\art\terrain\harvest\glassing_02_df.ddx.dds");
         }
+        public void Dispose()
+        {
+        }
+
+
         // Rendering
         public void Draw()
         {
+            //apply shader
+            Terrain.renderPass.Use();
+            
+            //use texture
+            Renderer.viewport.Device.ImmediateContext.PixelShader.SetShaderResource(texArraySRV, 0);
+
+            //update brush settings
+            DataStream d = new DataStream(16, true, true);
+            d.Write<int>(brushShape.GetActiveIndex());
+            d.Write<int>(brushHeightType.GetActiveIndex());
+            d.Write<float>(brushRadius.GetValue());
+            d.Write<float>(brushFalloff.GetValue());
+            d.Position = 0;
+            Renderer.viewport.Context.UpdateSubresource(new DataBox(0, 0, d), brushSettingsBuffer, 0);
+
+
+            //draw
             foreach (TerrainChunk t in terrainChunks)
             {
                 t.Draw();
@@ -335,10 +363,10 @@ namespace SMEditor.Editor
             {
                 for (int y = 0; y < chunksPerAxis; y++)
                 {
-                    if (chunkStatus[x, y].needsVisualUpdate)
+                    if (chunkStatuses[x, y].needsVisualUpdate)
                     {
                         terrainChunks[x, y].UpdateVisual();
-                        chunkStatus[x, y].needsVisualUpdate = false;
+                        chunkStatuses[x, y].needsVisualUpdate = false;
                     }
                 }
             }
@@ -349,10 +377,10 @@ namespace SMEditor.Editor
             {
                 for (int y = 0; y < chunksPerAxis; y++)
                 {
-                    if (chunkStatus[x, y].needsAABBUpdate)
+                    if (chunkStatuses[x, y].needsAABBUpdate)
                     {
                         terrainChunks[x, y].UpdateCollision();
-                        chunkStatus[x, y].needsAABBUpdate = false;
+                        chunkStatuses[x, y].needsAABBUpdate = false;
                     }
                 }
             }
@@ -363,25 +391,63 @@ namespace SMEditor.Editor
             {
                 for (int y = 0; y < chunksPerAxis; y++)
                 {
-                    if (chunkStatus[x, y].needsPaintUpdate)
+                    if (chunkStatuses[x, y].needsPaintUpdate)
                     {
                         terrainChunks[x, y].UpdatePaint();
-                        chunkStatus[x, y].needsPaintUpdate = false;
+                        chunkStatuses[x, y].needsPaintUpdate = false;
                     }
                 }
             }
         }
+        public void LoadTextureIntoSlot(int slot, string path)
+        {
+            var img = Pfim.Pfim.FromFile(path);
+            if (img.Width != 1024 || img.Height != 1024) throw new Exception("Terrain textures must be 1024x1024px.");
+            
+            textureData[slot] = new DataRectangle(1024 * 4, new DataStream(img.Data, true, true));
 
+            Texture2DDescription d = new Texture2DDescription()
+            {
+                ArraySize = 16,
+                BindFlags = BindFlags.ShaderResource,
+                CpuAccessFlags = CpuAccessFlags.None,
+                Format = Format.B8G8R8A8_UNorm,
+                Height = 1024,
+                MipLevels = 1,
+                OptionFlags = ResourceOptionFlags.None,
+                SampleDescription = new SampleDescription(1, 0),
+                Usage = ResourceUsage.Immutable,
+                Width = 1024,
+            };
+            texArray = new Texture2D(Renderer.viewport.Device, d, textureData);
+
+            ShaderResourceViewDescription texArraySrvd = new ShaderResourceViewDescription
+            {
+                Dimension = ShaderResourceViewDimension.Texture2DArray,
+                MipLevels = 1,
+                MostDetailedMip = 0,
+                FirstArraySlice = 0,
+                ArraySize = 16
+            };
+            texArraySRV = new ShaderResourceView(Renderer.viewport.Device, texArray, texArraySrvd);
+        }
+
+
+        // == Editing ==
+        // Brushe Settings
+        public Buffer brushSettingsBuffer;
+        public EnumProperty brushShape = new EnumProperty("Brush Shape", new string[] { "Shpere", "Box" }, 0); //these must match the order in the terrain shader for the visuals to be right.
+        public EnumProperty brushHeightType = new EnumProperty("Height Extent", new string[] { "Match Radius", "Infinite" }, 0);
+        public SliderProperty brushRadius = new SliderProperty("Size", 25, 1, 150);
+        public SliderProperty brushFalloff = new SliderProperty("Falloff", 10, 0, 100, DecimalPlaceCount.Double);
 
         // Gets
-        public class TerrainIndexMapping { public int index, x, y; public TerrainIndexMapping(int _i, int _x, int _y) { index = _i; x = _x; y = _y; } }
-        public enum RadiusMode { Sphere, Cyllinder }
-        public List<TerrainIndexMapping> GetVertsInRadius(Vector3 position, double radius, RadiusMode r = RadiusMode.Cyllinder)
+        public List<TerrainIndexMapping> GetVertsInBrush(Vector3 position)
         {
             List<TerrainIndexMapping> tim = new List<TerrainIndexMapping>();
 
             Vector3d v3d = Convert.ToV3d(position);
-            AxisAlignedBox3d pointBox = new AxisAlignedBox3d(v3d, radius);
+            AxisAlignedBox3d pointBox = new AxisAlignedBox3d(v3d, brushRadius.GetValue());
             pointBox.Min += new Vector3d(0, -1000f, 0); pointBox.Max += new Vector3d(0, 1000f, 0); //adjust box to always find neighboring chunks.
 
             foreach (TerrainChunk t in terrainChunks)
@@ -392,11 +458,7 @@ namespace SMEditor.Editor
                     {
                         Vector3 vert = Convert.ToV3(t.dMesh.GetVertex(v));
 
-                        //if cyllinder is selected, set the y position of the vertex we are scanning to be the same as the tested position's.
-                        //this basically makes the scan be done in 2D.
-                        if (r == RadiusMode.Cyllinder) vert.Y = position.Y; 
-
-                        if (Vector3.Distance(vert, position) <= radius)
+                        if (Vector3.Distance(vert, position) <= brushRadius.GetValue())
                         {
                             tim.Add(new TerrainIndexMapping(v, t.arrayX, t.arrayY));
                         }
@@ -444,58 +506,17 @@ namespace SMEditor.Editor
             terrainChunks[map.x, map.y].vertices[map.index].y = y;
             terrainChunks[map.x, map.y].vertNeedsCollisionUpdate[map.index] = true;
 
-            chunkStatus[map.x, map.y].needsVisualUpdate = true;
-            chunkStatus[map.x, map.y].needsAABBUpdate = true;
+            chunkStatuses[map.x, map.y].needsVisualUpdate = true;
+            chunkStatuses[map.x, map.y].needsAABBUpdate = true;
         }
 
         // Edit Terrain Paint
         public void Paint(TerrainIndexMapping i, TextureIndex ti, byte opacity)
         {
             terrainChunks[i.x, i.y].SetAlpha(i.index, ti, opacity);
-            chunkStatus[i.x, i.y].needsPaintUpdate = true;
+            chunkStatuses[i.x, i.y].needsPaintUpdate = true;
         }
+        
 
-        public void LoadTextureIntoSlot(int slot, string path)
-        {
-            textureData[slot] = new DataRectangle(1024 * 4, LoadDDS(path));
-
-            Texture2DDescription d = new Texture2DDescription()
-            {
-                ArraySize = 16,
-                BindFlags = BindFlags.ShaderResource,
-                CpuAccessFlags = CpuAccessFlags.None,
-                Format = Format.B8G8R8A8_UNorm,
-                Height = 1024,
-                MipLevels = 1,
-                OptionFlags = ResourceOptionFlags.None,
-                SampleDescription = new SampleDescription(1, 0),
-                Usage = ResourceUsage.Immutable,
-                Width = 1024,
-            };
-            texArray = new Texture2D(Renderer.viewport.Device, d, textureData);
-
-            ShaderResourceViewDescription srvd = new ShaderResourceViewDescription
-            {
-                Dimension = ShaderResourceViewDimension.Texture2DArray,
-                MipLevels = 1,
-                MostDetailedMip = 0,
-                FirstArraySlice = 0,
-                ArraySize = 16
-            };
-            ShaderResourceView v = new ShaderResourceView(Renderer.viewport.Device, texArray, srvd);
-            Renderer.viewport.Device.ImmediateContext.PixelShader.SetShaderResource(v, 0);
-        }
-        private DataStream LoadDDS(string path)
-        {
-            var img = Pfim.Pfim.FromFile(path);
-            if (img.Width != 1024 || img.Height != 1024) throw new Exception("Terrain textures must be 1024x1024px.");
-            return new DataStream(img.Data, true, true);
-        }
-
-
-        // Dtor
-        public void Dispose()
-        {
-        }
     };
 }

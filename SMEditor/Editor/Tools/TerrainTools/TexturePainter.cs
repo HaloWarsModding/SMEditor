@@ -1,6 +1,7 @@
 ﻿using SMEditor.Editor.Layout;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,7 +24,7 @@ namespace SMEditor.Editor.Tools.TerrainTools
             {
                 released = false;
 
-                foreach (Terrain.TerrainIndexMapping tim in Editor.scenario.terrain.GetVertsInRadius(Editor.cursor.t.position, 12))
+                foreach (Terrain.TerrainIndexMapping tim in Editor.scenario.terrain.GetVertsInBrush(Editor.cursor.t.position))
                 {
                     Editor.scenario.terrain.Paint(tim, (Terrain.TextureIndex)texture.GetActiveIndex(), (byte)opacity.GetValue());
                 }
@@ -35,12 +36,27 @@ namespace SMEditor.Editor.Tools.TerrainTools
         public override void Enable()
         {
             base.Enable();
-            Editor.propertiesPanel.SetProperties(SelectedType.Tool, "Texture Painter",
-                new PropertyField[] { texture, opacity });
+
+            Editor.propertiesPanel.AddTitle(Image.FromFile("thumbs\\tool.png"), "Tool");
+
+            Editor.propertiesPanel.AddLabel("Brush");
+            Editor.propertiesPanel.AddProperty(Editor.scenario.terrain.brushShape);
+            Editor.propertiesPanel.AddProperty(Editor.scenario.terrain.brushHeightType);
+            Editor.propertiesPanel.AddProperty(Editor.scenario.terrain.brushRadius);
+            Editor.propertiesPanel.AddProperty(Editor.scenario.terrain.brushFalloff);
+
+
+            Editor.propertiesPanel.NewGroup();
+            Editor.propertiesPanel.AddLabel("Painter");
+            Editor.propertiesPanel.AddProperty(opacity);
+            Editor.propertiesPanel.AddProperty(texture);
+
+            Editor.propertiesPanel.Present();
         }
         public override void Disable()
         {
             base.Disable();
+            Editor.propertiesPanel.Clear();
         }
     }
 }

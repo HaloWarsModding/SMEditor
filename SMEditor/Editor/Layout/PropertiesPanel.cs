@@ -23,7 +23,6 @@ namespace SMEditor.Editor.Layout
         Label selectedTypeText;
         public PropertiesPanel(bool showOnDefault) : base("Properties", showOnDefault)
         {
-
             tlp = new TableLayoutPanel();
             tlp.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
             tlp.BackColor = System.Drawing.Color.Beige;
@@ -40,7 +39,7 @@ namespace SMEditor.Editor.Layout
             Program.mainWindow.dockingManager.SetControlMinimumSize(p, new Size(250, 0));
             Program.mainWindow.dockingManager.SetControlSize(p, new Size(260, 0));
         }
-        public override void Init()
+        public void Init1()
         {
 
             p.Controls.Add(tlp);
@@ -73,7 +72,7 @@ namespace SMEditor.Editor.Layout
             tlp.Controls.Clear();
             tlp.RowCount = 2;
 
-            SetProperties(SelectedType.Tool, "TestTool", new PropertyField[2]
+            AddProperty(SelectedType.Tool, "TestTool", new PropertyField[2]
             {
                 new SliderProperty("TEST1", tempFloat1, 0, 20),
                 new SliderProperty("TEST2", tempFloat2, 0, 200)
@@ -100,7 +99,7 @@ namespace SMEditor.Editor.Layout
                 }
             }
         }
-        public void SetProperties(SelectedType selectedType, string selectedName, PropertyField[] pfs)
+        public void AddProperty(SelectedType selectedType, string selectedName, PropertyField[] pfs)
         {
             ClearProperties();
 
@@ -149,6 +148,129 @@ namespace SMEditor.Editor.Layout
             tlp.Controls.Clear();
             tlp.RowStyles.Clear();
             tlp.Height = 0;
+        }
+
+
+
+        List<Control> controls = new List<Control>();
+        TableLayoutPanel currentGroup;
+        public override void Init()
+        {
+            currentGroup = new TableLayoutPanel();
+            NewGroup();
+            controls.Add(currentGroup);
+        }
+
+        public void NewGroup()
+        {
+            if (!controls.Contains(currentGroup)) controls.Add(currentGroup);
+            currentGroup = new TableLayoutPanel();
+
+            currentGroup.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
+            //currentGroup.BackColor = System.Drawing.Color.Beige;
+            currentGroup.BackColor = Color.FromArgb(230, 230, 230);
+
+            currentGroup.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            currentGroup.Width = p.Width - 10;
+            currentGroup.Height = 1;
+            currentGroup.Location = new System.Drawing.Point(5, yTracker);
+
+            currentGroup.ColumnCount = 2;
+            currentGroup.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 75));
+
+            currentGroup.RowStyles.Clear();
+            currentGroup.Controls.Clear();
+            currentGroup.RowCount = 2;
+
+        }
+        public void AddProperty(PropertyField f)
+        {
+            tlp.RowCount++;
+
+            // property name
+            Label label = new Label();
+            label.Text = f.name;
+            label.Margin = new Padding(1, 4, 0, 0);
+            currentGroup.Controls.Add(label);
+
+            // specific types
+            if (f.type == PropertyField.Type.SliderProperty)
+            {
+                SliderProperty sp = (SliderProperty)f;
+                currentGroup.Controls.Add(sp.sc);
+                currentGroup.RowStyles.Add(new RowStyle(SizeType.Absolute, 22));
+                currentGroup.Height += 23;
+            }
+            if (f.type == PropertyField.Type.EnumProperty)
+            {
+                EnumProperty ep = (EnumProperty)f;
+                currentGroup.Controls.Add(ep.sc);
+                currentGroup.RowStyles.Add(new RowStyle(SizeType.Absolute, 22));
+                currentGroup.Height += 23;
+            }
+        }
+        public void AddLabel(string s)
+        {
+            Label label = new Label();
+            label.Text = s;
+            label.Margin = new Padding(1, 4, 0, 0);
+            currentGroup.RowStyles.Add(new RowStyle(SizeType.Absolute, 22));
+            currentGroup.Height += 23;
+            currentGroup.Controls.Add(label);
+            currentGroup.Controls.Add(new Label()); //to pad the 2nd column.
+        }
+
+        public void AddTitle(Image i, string text)
+        {
+            SplitContainer header = new SplitContainer();
+            Label selectedTypeText = new Label();
+            PictureBox selectedTypeImage = new PictureBox();
+
+            header.Width = p.Width - 10;
+            header.Height = 25;
+            header.BorderStyle = BorderStyle.FixedSingle;
+            header.Location = new System.Drawing.Point(5, 5);
+            header.SplitterDistance = 25;
+            header.IsSplitterFixed = true;
+            header.Anchor = AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Left;
+            header.FixedPanel = FixedPanel.Panel1;
+            header.Panel1.Controls.Add(selectedTypeImage);
+            header.Panel2.Controls.Add(selectedTypeText);
+
+            selectedTypeImage.Size = new System.Drawing.Size(25, 25);
+            selectedTypeImage.Location = new System.Drawing.Point(2, 2);
+            selectedTypeImage.Image = i;
+
+            selectedTypeText.Size = new System.Drawing.Size(header.Panel2.Width, 25);
+            selectedTypeText.Font = new System.Drawing.Font("Segoe UI", 8, System.Drawing.FontStyle.Regular);
+            selectedTypeText.Location = new System.Drawing.Point(1, 4);
+            selectedTypeText.Text = text;
+
+            controls.Add(header);
+        }
+
+        int yTracker;
+        public void Present()
+        {
+            if (!controls.Contains(currentGroup)) controls.Add(currentGroup);
+            yTracker = 5;
+
+            foreach (Control c in controls.Distinct())
+            {
+                c.Width = p.Width - 10;
+                c.Location = new Point(5, yTracker);
+                p.Controls.Add(c);
+                yTracker += c.Height + 10;
+            }
+        }
+        public void Clear()
+        {
+            foreach(Control c in controls)
+            {
+                p.Controls.Remove(c);
+            }
+            NewGroup();
+            controls.Clear();
         }
     }
 
@@ -205,7 +327,7 @@ namespace SMEditor.Editor.Layout
             n.Height = 11;
             n.ReadOnly = true;
             n.Location = new System.Drawing.Point(n.Location.X - 2, -2);
-            n.Text = _initValue.ToString();
+            n.Text = (_initValue / divideBy).ToString();
             n.NumberDecimalDigits = 1;
 
             // divider for trackbar and numerictextbox.

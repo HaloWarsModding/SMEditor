@@ -11,6 +11,7 @@ using SMEditor;
 using SMEditor.Editor.Layout;
 using SlimDX.Direct3D11;
 using SMEditor.Editor.Tools.TerrainTools;
+using SMEditor.Editor;
 
 namespace SMEditor.Editor
 {
@@ -101,6 +102,9 @@ namespace SMEditor.Editor
             //init world
             cursor = new _3dCursor();
             LoadNewProject(HWDEScenarioSize.small512);
+
+            //temp
+            TerrainToolDock.tools["Texture Painter"].button.PerformClick();
         }
     }
 }

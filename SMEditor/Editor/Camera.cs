@@ -35,8 +35,8 @@ namespace SMEditor.Editor
                     });
 
                 t.position = new Vector3(0, 0, -1); //must come before any rotate/addradius calls.
-                Rotate(0, .1f);
-                AddRadius(5f);
+                Rotate(0, .5f);
+                AddRadius(25f);
 
                 UpdateProjMatrix();
                 UpdateCameraBuffer();

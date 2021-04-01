@@ -28,6 +28,7 @@ namespace SMEditor
         {
             Editor.Editor.PreUILoad();
 
+
             //TODO: Replace this with a proper layout manager.
             dockingManager.DockControl(Editor.Editor.viewportPanel.p, this, DockingStyle.Right, 675);
             dockingManager.EnableContextMenu = false;
@@ -47,6 +48,12 @@ namespace SMEditor
         private void CLOSING(object sender, FormClosingEventArgs e)
         {
 
+        }
+        private void RESIZE(object sender, EventArgs e)
+        {
+            if (!uiLoaded) return;
+
+            Renderer.Resize();
         }
 
         //d3D11Control

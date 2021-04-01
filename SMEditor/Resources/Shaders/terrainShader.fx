@@ -9,6 +9,19 @@ cbuffer alphasBuffer : register (b1)
 	uint4 alphas[64 * 64];
 };
 
+cbuffer cursorLoc : register (b2)
+{
+	float4 cursorLocation;
+}
+
+cbuffer brushInfo : register (b3)
+{
+	int brushType;  // 0 = sphere || 1 = cube
+	int brushHeightType; // 0 = match radius || 1 = infinite y
+	float brushRadius;
+	float brushFalloffFactor;
+}
+
 
 Texture2DArray tex;
 SamplerState samplerState
@@ -31,11 +44,13 @@ struct vs_input
 
 struct gsps_input
 {
-	float4 pos : SV_POSITION;
 	float4 color : COLOR_GSPS;
 	float3 normal : NORMAL_GSPS;
 	float2 uv : UV_GSPS;
 	int vindex : INDEX_GSPS;
+
+	float4 pos : SV_POSITION;
+	float3 rawPos : RAW_POS;
 };
 
 gsps_input vs(vs_input input)
@@ -47,6 +62,7 @@ gsps_input vs(vs_input input)
 	output.normal = normalize(mul(input.normal, m));
 	output.uv = input.uv;
 	output.vindex = input.vindex;
+	output.rawPos = input.pos;
 	return output;
 }
 
@@ -152,11 +168,52 @@ float4 GetTexture(gsps_input input)
 
 	return finalColor;
 }
-
-
-float4 ps(gsps_input input) : SV_TARGET
+float4 GetBrushOverlay(gsps_input input)
 {
-	return GetTexture(input);
+	//what a mess!
+	float4 outColor = float4(0, 0, 0, 0);
+	float3 vertPos;
+
+	float max = .25f;
+
+	if (brushType == 0)
+		vertPos = input.rawPos;
+	else return float4(0, 0, 0, 0);
+
+	float dist = distance(vertPos, cursorLocation.xyz);
+	float radIsZero = dist - (brushRadius * (1 - brushFalloffFactor));
+	float outIsOne = radIsZero / (brushRadius * brushFalloffFactor);
+
+	float lerped = lerp(1, 0, outIsOne);
+	float final = clamp(lerped, 0, 1) * max;
+
+	if (dist < brushRadius
+		&& dist > brushRadius - (brushRadius * brushFalloffFactor))
+	{
+		outColor = float4(final / 2, final, final, 0);
+	}
+	if (dist < brushRadius - (brushRadius * brushFalloffFactor))
+	{
+		outColor = float4(final, final, final, 0);
+	}
+	if (dist > brushRadius && dist < brushRadius + 1.f)
+	{
+		outColor = float4(.5f, .5f, .5f, 0);
+	}
+
+	return outColor;
+}
+
+struct ps_output
+{
+	float4 col : SV_Target; 
+};
+
+ps_output ps(gsps_input input) : SV_TARGET
+{
+	ps_output output;
+	output.col = GetTexture(input) + GetBrushOverlay(input);
+	return output;
 }
 
 

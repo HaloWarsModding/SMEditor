@@ -78,7 +78,7 @@
     </Reference>
     <Reference Include="SlimDX.D3D11Control, Version=1.0.0.1, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\SlimDX SDK (January 2012)\Bin\net40\x64\SlimDX.D3D11Control.dll</HintPath>
+      <HintPath>..\..\..\..\Desktop\SlimDX.D3D11Control-master\bin\Debug\SlimDX.D3D11Control.dll</HintPath>
     </Reference>
     <Reference Include="Syncfusion.Grid.Base, Version=18.4460.0.30, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89" />
     <Reference Include="Syncfusion.Grid.Grouping.Windows, Version=18.4460.0.30, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89, processorArchitecture=MSIL" />
@@ -142,7 +142,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Editor\3dCursor.cs" />
+    <Compile Include="Editor\Cursor\3dCursor.cs" />
+    <Compile Include="Editor\Cursor\CursorSphereData.cs" />
     <Compile Include="Editor\Scenario\HWDEScenario.cs" />
     <Compile Include="Editor\Layout\DockableWindow.cs" />
     <Compile Include="Editor\Layout\OutputPanel.cs" />
@@ -206,6 +207,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\Shaders\radviewShader.fx" />
     <Content Include="Resources\Shaders\cursorShader.fx" />
     <Content Include="Resources\Shaders\terrainShader.fx" />
   </ItemGroup>

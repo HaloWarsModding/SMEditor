@@ -209,6 +209,7 @@ namespace SMEditor
             this.Shown += new System.EventHandler(this.internal_POSTLOAD);
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
+            this.Resize += new EventHandler(this.RESIZE);
             this.layout.Panel1.ResumeLayout(false);
             this.layout.Panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.layout)).EndInit();
